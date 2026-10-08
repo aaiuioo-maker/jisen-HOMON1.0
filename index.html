@@ -2,13 +2,23 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>実践訪問先</title>
+<!-- ── ホーム画面アイコン ── -->
+<link rel="apple-touch-icon" href="icon.png?v=2">
+<link rel="icon" type="image/png" href="icon.png?v=2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="訪問先">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f2f2f7">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* iOS 風の明るい単一テーマ（元アプリのデザインを維持） */
 :root {
+  color-scheme: light;
   --bg: #f2f2f7;
   --surface: #ffffff;
   --surface2: #f2f2f7;
@@ -22,18 +32,19 @@
   --text-faint: #8e8e93;
   --yellow: #ff9500;
   --card-r: 14px;
-  --font: 'Noto Sans JP', sans-serif;
-  --mono: 'DM Mono', monospace;
+  --font: 'Noto Sans JP', -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --mono: 'DM Mono', ui-monospace, Menlo, monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
 
 body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  padding-bottom: 80px;
+  padding-bottom: 90px;
 }
 
 /* ── SPLASH ── */
@@ -55,6 +66,7 @@ body {
   background: linear-gradient(135deg, #1c1c1e 0%, var(--accent) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
+.splash-hint { font-size: 12px; color: var(--text-faint); }
 .splash-pulse {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--accent); margin-top: 10px;
@@ -64,29 +76,29 @@ body {
   0%,100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.8); opacity: 0.4; }
 }
+@media (prefers-reduced-motion: reduce) { .splash-pulse { animation: none; } }
 
 /* ── TOPBAR ── */
 .topbar {
-  position: sticky; top: 0; z-index: 100;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 100;
   background: rgba(242,242,247,0.9);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-.topbar-title {
-  font-size: 17px; font-weight: 700; letter-spacing: 0.5px;
-}
+.topbar-title { font-size: 17px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; }
 .topbar-actions { display: flex; gap: 6px; }
 .icon-btn {
-  min-width: 58px;
-  padding: 5px 8px;
+  min-width: 54px;
+  padding: 5px 6px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 10px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   cursor: pointer; transition: background 0.15s;
-  color: var(--text);
+  color: var(--text); font-family: var(--font);
 }
 .icon-btn:active { background: var(--surface3); }
 .icon-btn .ico { font-size: 18px; line-height: 1; }
@@ -100,10 +112,11 @@ body {
   background: var(--bg);
 }
 .tab {
-  flex: 1; padding: 10px 4px; text-align: center;
+  flex: 1; padding: 10px 2px; text-align: center;
   font-size: 13px; font-weight: 600; color: var(--text-dim);
-  cursor: pointer; border-bottom: 2px solid transparent;
-  transition: all 0.2s; letter-spacing: 0.3px;
+  cursor: pointer; border: none; background: none; font-family: var(--font);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s; letter-spacing: 0.3px; white-space: nowrap;
 }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
@@ -119,7 +132,7 @@ body {
 }
 .section-label:first-child { margin-top: 0; }
 
-.field { margin-bottom: 10px; }
+.field { margin-bottom: 10px; min-width: 0; }
 .field label {
   display: block; font-size: 12px; font-weight: 600;
   color: var(--text-dim); margin-bottom: 5px; letter-spacing: 0.3px;
@@ -130,17 +143,15 @@ body {
   border: 1px solid var(--border);
   border-radius: 10px;
   color: var(--text);
-  font-size: 15px;
+  font-size: 16px;
   font-family: var(--font);
   outline: none;
   transition: border-color 0.2s;
-  appearance: auto;
 }
-.field input:focus, .field select:focus, .field textarea:focus {
-  border-color: var(--accent);
-}
-.field select option { background: #222; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.field select option { background: var(--surface); color: var(--text); }
 .field textarea { resize: vertical; }
+.field-error { font-size: 12px; color: var(--accent2); margin-top: 6px; font-weight: 600; }
 
 .row { display: flex; gap: 10px; }
 .row .field { flex: 1; }
@@ -149,31 +160,33 @@ body {
   width: 100%; padding: 14px;
   background: var(--accent);
   color: white; border: none; border-radius: 12px;
-  font-size: 15px; font-weight: 700;
+  font-size: 15px; font-weight: 700; font-family: var(--font);
   cursor: pointer; margin-top: 16px;
   transition: opacity 0.15s, transform 0.1s;
   letter-spacing: 0.3px;
 }
 .submit-btn:active { opacity: 0.8; transform: scale(0.99); }
-.submit-btn.edit-mode { background: #ff9500; }
+.submit-btn.edit-mode { background: var(--yellow); }
+.submit-btn.danger { background: var(--accent2); }
 .cancel-btn {
   width: 100%; padding: 12px;
   background: var(--surface2);
   color: var(--text-dim); border: none; border-radius: 12px;
-  font-size: 14px; font-weight: 600;
+  font-size: 14px; font-weight: 600; font-family: var(--font);
   cursor: pointer; margin-top: 8px;
+}
+button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
 }
 
 /* ── SEARCH ── */
-.search-wrap {
-  position: relative; margin-bottom: 14px;
-}
+.search-wrap { position: relative; margin-bottom: 14px; }
 .search-wrap input {
   width: 100%; padding: 10px 12px 10px 38px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  color: var(--text); font-size: 14px;
+  color: var(--text); font-size: 16px;
   font-family: var(--font); outline: none;
   transition: border-color 0.2s;
 }
@@ -196,24 +209,21 @@ body {
 }
 .record-card.selected { border-color: var(--accent); }
 
-.card-top {
-  display: flex; align-items: center; gap: 10px;
-  padding: 14px 14px 10px;
-}
+.card-top { display: flex; align-items: center; gap: 10px; padding: 14px 14px 10px; }
 .card-checkbox { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
-.card-name { font-size: 17px; font-weight: 700; flex: 1; }
+.card-name { font-size: 17px; font-weight: 700; flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .visit-badge {
   font-family: var(--mono); font-size: 11px; font-weight: 500;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 6px; padding: 2px 8px;
-  color: var(--accent);
+  color: var(--accent); white-space: nowrap;
 }
 
 .card-body { padding: 0 14px 12px; }
 .card-row { display: flex; gap: 6px; align-items: flex-start; margin-bottom: 4px; }
 .card-row-label { font-size: 11px; color: var(--text-faint); width: 42px; flex-shrink: 0; padding-top: 1px; }
-.card-row-val { font-size: 13px; color: var(--text-dim); flex: 1; line-height: 1.5; }
+.card-row-val { font-size: 13px; color: var(--text-dim); flex: 1; min-width: 0; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }
 .card-row-val a { color: var(--accent); text-decoration: none; }
 
 .dates-section { margin: 8px 0; padding: 10px; background: var(--surface2); border-radius: 10px; }
@@ -223,41 +233,41 @@ body {
   display: flex; align-items: center; gap: 4px;
   background: var(--surface3); border-radius: 20px;
   padding: 4px 10px; font-size: 12px; color: var(--text);
-  font-family: var(--mono);
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
 }
 .date-num { font-size: 10px; color: var(--accent); font-weight: 700; margin-right: 2px; }
 .del-date {
-  width: 16px; height: 16px; border-radius: 50%;
+  width: 18px; height: 18px; border-radius: 50%;
   background: var(--accent2); color: white; border: none;
   font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   font-weight: 700; line-height: 1;
 }
+.no-dates { font-size: 12px; color: var(--text-faint); }
 
 .card-actions {
   display: flex; gap: 6px; padding: 10px 14px;
   border-top: 1px solid var(--border);
-  flex-wrap: wrap;
 }
 .map-btn, .act-btn {
   flex: 1; min-width: 0;
-  padding: 9px 4px; border-radius: 8px; border: none;
-  font-size: 11px; font-weight: 700; cursor: pointer;
+  padding: 9px 2px; border-radius: 8px; border: none;
+  font-size: 11px; font-weight: 700; cursor: pointer; font-family: var(--font);
   text-align: center; text-decoration: none;
   display: flex; align-items: center; justify-content: center;
   line-height: 1.3; transition: opacity 0.15s;
   color: white;
 }
 .map-btn:active, .act-btn:active { opacity: 0.7; }
-.btn-apple { background: #1c1c1e; border: 1px solid #444; }
-.btn-google { background: #4285F4; }
-.btn-yahoo { background: #e03030; }
+.btn-apple { background: #1c1c1e; border: 1px solid #444; color: white; }
+.btn-google { background: #4285F4; color: white; }
+.btn-yahoo { background: #e03030; color: white; }
 .btn-adddate { background: var(--yellow); color: #222; }
 .btn-edit { background: var(--surface3); border: 1px solid var(--border); color: var(--text); }
 .btn-delete-card {
-  width: 100%; padding: 9px;
-  margin: 0 14px 12px; width: calc(100% - 28px);
+  display: block;
+  margin: 0 14px 12px; width: calc(100% - 28px); padding: 9px;
   background: rgba(255,59,48,0.12); border: 1px solid rgba(255,59,48,0.3);
-  color: #ff3b30; border-radius: 8px; font-size: 12px; font-weight: 700;
+  color: #d70015; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: var(--font);
   cursor: pointer;
 }
 .btn-delete-card:active { background: rgba(255,59,48,0.25); }
@@ -265,53 +275,49 @@ body {
 /* ── MULTI-MAP BAR ── */
 .multi-bar {
   display: none;
-  position: fixed; bottom: 16px; left: 16px; right: 16px;
-  background: #ffffff;
+  position: fixed; left: 16px; right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 10px;
   gap: 8px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 200;
 }
 .multi-bar.visible { display: flex; }
-.multi-bar-label { font-size: 11px; color: var(--text-dim); font-weight: 600; padding: 0 4px; display: flex; align-items: center; }
+.multi-bar-label { font-size: 11px; color: var(--text-dim); font-weight: 600; padding: 0 4px; display: flex; align-items: center; white-space: nowrap; }
 .multi-bar-btn {
   flex: 1; padding: 10px 4px; border-radius: 8px; border: none;
-  font-size: 12px; font-weight: 700; cursor: pointer; color: white;
+  font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font);
+  text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;
 }
 
 /* ── MAP VIEW ── */
 #mapPane { padding: 0; }
-.map-toolbar {
-  padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between;
+.map-head {
+  padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 6px;
+  align-items: center; justify-content: space-between;
   border-bottom: 1px solid var(--border);
 }
-.map-toolbar span { font-size: 13px; color: var(--text-dim); }
-
-#mapFrame {
-  width: 100%;
-  height: calc(100vh - 110px);
-  border: none;
-}
-
+.map-head span { font-size: 13px; color: var(--text-dim); }
+.map-head a { font-size: 12px; color: var(--accent); text-decoration: none; font-weight: 600; }
+.map-note { font-size: 11px; color: var(--text-faint); padding: 8px 16px 0; }
 .map-card-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
 .map-list-item {
   display: flex; gap: 12px; align-items: center;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px; padding: 12px;
-  cursor: pointer; transition: border-color 0.2s;
 }
-.map-list-item:hover { border-color: var(--accent); }
 .map-pin { font-size: 22px; }
-.map-item-info { flex: 1; }
-.map-item-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-.map-item-addr { font-size: 12px; color: var(--text-dim); }
-.map-item-visits { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+.map-item-info { flex: 1; min-width: 0; }
+.map-item-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; overflow-wrap: anywhere; }
+.map-item-addr { font-size: 12px; color: var(--text-dim); overflow-wrap: anywhere; }
+.map-item-visits { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-top: 3px; }
 .map-open-btn {
   padding: 7px 12px; background: var(--accent);
-  border: none; border-radius: 8px;
+  border: none; border-radius: 8px; text-decoration: none; text-align: center;
   color: white; font-size: 12px; font-weight: 700; cursor: pointer;
 }
 
@@ -325,7 +331,7 @@ body {
 }
 .stat-num {
   font-size: 32px; font-weight: 700; font-family: var(--mono);
-  color: var(--accent); line-height: 1;
+  color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums;
 }
 .stat-label { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
 
@@ -336,53 +342,52 @@ body {
   border-radius: 10px; padding: 10px 12px;
 }
 .rank-num { font-family: var(--mono); font-size: 13px; color: var(--text-faint); width: 20px; }
-.rank-name { flex: 1; font-size: 14px; font-weight: 600; }
-.rank-bar-wrap { width: 80px; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+.rank-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.rank-bar-wrap { width: 80px; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
 .rank-bar { height: 100%; background: var(--accent); border-radius: 3px; }
 .rank-count { font-family: var(--mono); font-size: 12px; color: var(--accent); width: 32px; text-align: right; }
 
 /* ── MODALS ── */
 .modal-overlay {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.55);
   z-index: 500; justify-content: center; align-items: flex-end;
   backdrop-filter: blur(4px);
 }
 .modal-overlay.open { display: flex; }
+.modal-overlay.center { align-items: center; }
 .modal-sheet {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 20px 20px 0 0;
-  padding: 20px 16px 36px;
+  padding: 20px 16px calc(36px + env(safe-area-inset-bottom, 0px));
   width: 100%; max-width: 500px;
   max-height: 90vh; overflow-y: auto;
   border-top: 1px solid var(--border);
 }
-.modal-handle {
-  width: 36px; height: 4px; background: var(--surface3);
-  border-radius: 2px; margin: 0 auto 16px;
+.modal-overlay.center .modal-sheet { border-radius: 16px; margin: 16px; max-height: 85vh; padding-bottom: 20px; }
+.modal-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 0 auto 16px; }
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.modal-text { font-size: 14px; color: var(--text-dim); margin-bottom: 14px; line-height: 1.6; }
+.json-box {
+  width: 100%; height: 160px; padding: 10px;
+  font-family: var(--mono); font-size: 11px;
+  background: var(--surface2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px; resize: vertical;
 }
-.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
 
-/* ── TABLE MODAL ── */
-#tableModal .modal-sheet { border-radius: 16px; margin: 20px; max-height: 85vh; }
-.record-table {
-  width: 100%; border-collapse: collapse; font-size: 11px;
+/* ── TOAST ── */
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  background: rgba(28,28,30,0.92); color: #fff;
+  padding: 10px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  z-index: 1000; max-width: calc(100% - 32px); text-align: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
 }
-.record-table th, .record-table td {
-  border: 1px solid var(--border); padding: 6px 5px;
-  text-align: left; vertical-align: top;
-}
-.record-table th {
-  background: var(--surface2); font-size: 10px;
-  color: var(--text-dim); white-space: nowrap;
-}
-#tableModal .modal-overlay { align-items: center; }
+.toast.show { opacity: 1; }
 
 /* ── MISC ── */
-.empty-state {
-  text-align: center; padding: 60px 20px;
-  color: var(--text-faint);
-}
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-faint); }
 .empty-icon { font-size: 48px; margin-bottom: 12px; }
 .empty-text { font-size: 14px; }
 </style>
@@ -393,6 +398,7 @@ body {
 <div id="splashScreen" onclick="startApp()">
   <p class="splash-logo">Field Visit Manager</p>
   <h1 class="splash-title">実践訪問先</h1>
+  <p class="splash-hint">タップして開始</p>
   <div class="splash-pulse"></div>
 </div>
 
@@ -400,25 +406,24 @@ body {
 <div class="topbar">
   <div class="topbar-title">実践訪問先</div>
   <div class="topbar-actions">
-    <div class="icon-btn" onclick="openTableModal()">
+    <button class="icon-btn" onclick="openTableModal()">
       <span class="ico">🖼️</span><span class="lbl">画像保存</span>
-    </div>
-    <div class="icon-btn" onclick="exportData()">
+    </button>
+    <button class="icon-btn" onclick="openExportModal()">
       <span class="ico">⬇️</span><span class="lbl">データ保存</span>
-    </div>
-    <div class="icon-btn" onclick="document.getElementById('importFile').click()">
+    </button>
+    <button class="icon-btn" onclick="openImportModal()">
       <span class="ico">🔄</span><span class="lbl">復元</span>
-    </div>
-    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+    </button>
   </div>
 </div>
 
 <!-- TABS -->
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('list')">📋 記録一覧</div>
-  <div class="tab" onclick="switchTab('map')">🗺 地図</div>
-  <div class="tab" onclick="switchTab('stats')">📊 統計</div>
-  <div class="tab" onclick="switchTab('form')">＋ 登録</div>
+  <button class="tab active" data-tab="list" onclick="switchTab('list')">📋 記録一覧</button>
+  <button class="tab" data-tab="map" onclick="switchTab('map')">🗺 地図</button>
+  <button class="tab" data-tab="stats" onclick="switchTab('stats')">📊 統計</button>
+  <button class="tab" data-tab="form" onclick="switchTab('form')">＋ 登録</button>
 </div>
 
 <!-- LIST PANE -->
@@ -432,6 +437,7 @@ body {
 
 <!-- MAP PANE -->
 <div class="pane" id="mapPane">
+  <div id="mapHead"></div>
   <div class="map-card-list" id="mapCardList"></div>
 </div>
 
@@ -444,24 +450,25 @@ body {
 
 <!-- FORM PANE -->
 <div class="pane" id="formPane">
+  <form id="recordForm" onsubmit="event.preventDefault(); saveRecord();">
   <input type="hidden" id="editId">
 
   <p class="section-label">基本情報</p>
   <div id="dateInputGroup" class="field">
-    <label>初回訪問日</label>
+    <label for="visitDate">初回訪問日</label>
     <input type="date" id="visitDate">
   </div>
   <div class="field">
-    <label>訪問先の名前 *</label>
+    <label for="name">訪問先の名前 *</label>
     <input type="text" id="name" placeholder="例: 山田 太郎">
   </div>
   <div class="row">
     <div class="field">
-      <label>年齢</label>
-      <input type="number" id="age" placeholder="30">
+      <label for="age">年齢</label>
+      <input type="number" id="age" placeholder="30" inputmode="numeric">
     </div>
     <div class="field">
-      <label>性別</label>
+      <label for="gender">性別</label>
       <select id="gender">
         <option value="未確認">選択</option>
         <option value="男性">男性</option>
@@ -471,41 +478,43 @@ body {
   </div>
   <div class="row">
     <div class="field">
-      <label>国籍 / 出身</label>
+      <label for="nationality">国籍 / 出身</label>
       <input type="text" id="nationality" placeholder="日本">
     </div>
     <div class="field">
-      <label>職業</label>
+      <label for="occupation">職業</label>
       <input type="text" id="occupation" placeholder="会社員">
     </div>
   </div>
 
   <p class="section-label">連絡先</p>
   <div class="field">
-    <label>電話番号</label>
+    <label for="phone">電話番号</label>
     <input type="tel" id="phone" placeholder="090-1234-5678">
   </div>
   <div class="field">
-    <label>住所 *</label>
+    <label for="address">住所 *</label>
     <input type="text" id="address" placeholder="例: 京都市伏見区…">
   </div>
 
   <p class="section-label">その他</p>
   <div class="field">
-    <label>備考欄</label>
+    <label for="remarks">備考欄</label>
     <textarea id="remarks" rows="3" placeholder="メモや特記事項など"></textarea>
   </div>
 
-  <button class="submit-btn" id="submitBtn" onclick="saveRecord()">登録する</button>
-  <button class="cancel-btn" id="cancelBtn" onclick="cancelEdit()" style="display:none">キャンセル</button>
+  <p class="field-error" id="formError" hidden>名前と住所は必須です。</p>
+  <button type="submit" class="submit-btn" id="submitBtn">登録する</button>
+  <button type="button" class="cancel-btn" id="cancelBtn" onclick="cancelEdit()" hidden>キャンセル</button>
+  </form>
 </div>
 
 <!-- MULTI-MAP BAR -->
 <div class="multi-bar" id="multiBar">
-  <span class="multi-bar-label" id="multiBarLabel">2件選択中</span>
-  <button class="multi-bar-btn btn-apple" onclick="openMultipleOnMap('apple')">🍎 純正</button>
-  <button class="multi-bar-btn btn-google" onclick="openMultipleOnMap('google')">Google</button>
-  <button class="multi-bar-btn btn-yahoo" onclick="openMultipleOnMap('yahoo')">Y! Yahoo</button>
+  <span class="multi-bar-label" id="multiBarLabel">0件選択中</span>
+  <a class="multi-bar-btn btn-apple" id="multiApple" onclick="afterMultiOpen()">🍎 純正</a>
+  <a class="multi-bar-btn btn-google" id="multiGoogle" onclick="afterMultiOpen()">Google</a>
+  <button class="multi-bar-btn btn-yahoo" id="multiYahoo" onclick="multiYahoo()">Y! Yahoo</button>
 </div>
 
 <!-- ADD DATE MODAL -->
@@ -513,37 +522,80 @@ body {
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <p class="modal-title">訪問日を追加</p>
-    <p id="targetNameForDate" style="font-size:14px; color:var(--text-dim); margin-bottom:14px;"></p>
+    <p id="targetNameForDate" class="modal-text"></p>
     <div class="field">
-      <label>訪問日</label>
+      <label for="newVisitDateInput">訪問日</label>
       <input type="date" id="newVisitDateInput">
     </div>
     <input type="hidden" id="targetIdForDate">
     <button class="submit-btn" style="background:var(--accent3); color:#111;" onclick="confirmAddDate()">追加する</button>
-    <button class="cancel-btn" onclick="closeDateModal()">キャンセル</button>
+    <button class="cancel-btn" onclick="closeModal('dateModal')">キャンセル</button>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL（ブラウザの確認ダイアログの代わり） -->
+<div class="modal-overlay center" id="confirmModal">
+  <div class="modal-sheet">
+    <p class="modal-title" id="confirmTitle">確認</p>
+    <p class="modal-text" id="confirmText"></p>
+    <button class="submit-btn danger" id="confirmOk">削除する</button>
+    <button class="cancel-btn" id="confirmCancel">キャンセル</button>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay center" id="exportModal">
+  <div class="modal-sheet">
+    <p class="modal-title">データ保存</p>
+    <p class="modal-text">バックアップの .json ファイルを保存します。ファイルが保存できないときは、下のデータを「コピー」してメモアプリなどに貼り付けてください。</p>
+    <textarea class="json-box" id="exportBox" readonly></textarea>
+    <button class="submit-btn" onclick="downloadExport()">⬇️ ファイルで保存</button>
+    <button class="submit-btn" style="background:var(--surface3); color:var(--text); margin-top:8px;" onclick="copyExport()">📋 コピー</button>
+    <button class="cancel-btn" onclick="closeModal('exportModal')">閉じる</button>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay center" id="importModal">
+  <div class="modal-sheet">
+    <p class="modal-title">データ復元</p>
+    <p class="modal-text">保存しておいたデータを貼り付けるか、バックアップの .json ファイルを選んでください。今の記録は置き換わります。</p>
+    <textarea class="json-box" id="importBox" placeholder='[{"id":"…","name":"…"}]'></textarea>
+    <div class="field" style="margin-top:10px;">
+      <label for="importFile">またはファイルを選ぶ</label>
+      <input type="file" id="importFile" accept=".json,application/json" onchange="importFromFile(event)">
+    </div>
+    <p class="field-error" id="importError" hidden></p>
+    <button class="submit-btn" onclick="importFromText()">復元する</button>
+    <button class="cancel-btn" onclick="closeModal('importModal')">キャンセル</button>
   </div>
 </div>
 
 <!-- TABLE MODAL -->
-<div class="modal-overlay" id="tableModal" style="align-items:center;">
-  <div class="modal-sheet" style="border-radius:16px; margin:16px; max-height:85vh;">
+<div class="modal-overlay center" id="tableModal">
+  <div class="modal-sheet">
     <p class="modal-title">訪問記録一覧表</p>
-    <div id="captureArea" style="background:white; padding:6px; border-radius:8px; overflow-x:auto;"></div>
-    <button class="submit-btn" id="saveImgBtn" style="background:#ff9500; margin-top:12px;" onclick="saveAsImage()">📸 画像に変換して保存</button>
-    <button class="cancel-btn" onclick="closeTableModal()">閉じる</button>
+    <div id="captureArea" style="overflow:auto; max-height:52vh; background:white; padding:4px; border-radius:8px;"></div>
+    <button class="submit-btn" id="saveImgBtn" style="background:var(--yellow); margin-top:12px;" onclick="saveAsImage()">📸 画像に変換して保存</button>
+    <button class="cancel-btn" onclick="closeModal('tableModal')">閉じる</button>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 // ── AUDIO ──
-const AudioContext = window.AudioContext || window.webkitAudioContext;
+const AC = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
 function initAudio() {
-  if (!audioCtx) audioCtx = new AudioContext();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  try {
+    if (!audioCtx && AC) audioCtx = new AC();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) {}
 }
 function playTone(freq, type, dur, t = 0) {
   initAudio();
+  if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = type; osc.frequency.value = freq;
@@ -562,7 +614,85 @@ function startApp() {
   initAudio(); chime();
   const s = document.getElementById('splashScreen');
   s.style.opacity = '0';
-  setTimeout(() => s.style.display = 'none', 700);
+  setTimeout(() => s.hidden = true, 700);
+}
+
+// ── HELPERS ──
+// 入力された文字をそのまま表示する（< や & で画面が崩れないように）
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { click(); document.getElementById(id).classList.remove('open'); }
+
+// ブラウザの confirm() の代わり（公開ページでは confirm が使えないため）
+function askConfirm(title, text, okLabel = '削除する') {
+  return new Promise(resolve => {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmText').textContent = text;
+    const ok = document.getElementById('confirmOk');
+    const cancel = document.getElementById('confirmCancel');
+    ok.textContent = okLabel;
+    const done = v => {
+      ok.onclick = cancel.onclick = null;
+      document.getElementById('confirmModal').classList.remove('open');
+      resolve(v);
+    };
+    ok.onclick = () => done(true);
+    cancel.onclick = () => { click(); done(false); };
+    openModal('confirmModal');
+  });
+}
+
+// 地図アプリを直接開くリンク
+const appleMapUrl = addr => `maps://?q=${encodeURIComponent(addr)}`;
+const googleMapUrl = addr => `comgooglemaps://?q=${encodeURIComponent(addr)}`;
+// 複数地点：Google は途中の訪問先もすべて入れた経路（+to: でつなぐ）
+function googleRouteUrl(addrs) {
+  if (addrs.length === 1) return googleMapUrl(addrs[0]);
+  const dest = addrs.slice(1).map(encodeURIComponent).join('+to:');
+  return `comgooglemaps://?saddr=${encodeURIComponent(addrs[0])}&daddr=${dest}`;
+}
+function appleRouteUrl(addrs) {
+  if (addrs.length === 1) return appleMapUrl(addrs[0]);
+  return `maps://?saddr=${encodeURIComponent(addrs[0])}&daddr=${encodeURIComponent(addrs[1])}`;
+}
+// 地図タブの全件表示（Web版Googleマップ、最大11地点）
+function googleWebRouteUrl(addrs) {
+  if (addrs.length === 1) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addrs[0])}`;
+  const way = addrs.slice(1, -1);
+  let url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(addrs[0])}&destination=${encodeURIComponent(addrs[addrs.length - 1])}&travelmode=driving`;
+  if (way.length) url += `&waypoints=${encodeURIComponent(way.join('|'))}`;
+  return url;
+}
+// Yahoo!マップ：国土地理院で緯度経度を調べてピンを立てる（失敗したら住所で検索）
+function openYahooMap(address, name) {
+  click();
+  const cleanAddr = address.split(/[\s　]/)[0];
+  const fallback = () => { window.location.href = `yjmap://search?q=${encodeURIComponent(address)}`; };
+  fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(cleanAddr)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.length > 0 && data[0].geometry) {
+        const [lon, lat] = data[0].geometry.coordinates;
+        window.location.href = `yjmap://pin/?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name || address)}`;
+      } else fallback();
+    })
+    .catch(fallback);
 }
 
 // ── TABS ──
@@ -570,170 +700,166 @@ let currentTab = 'list';
 function switchTab(tab) {
   click();
   currentTab = tab;
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    const names = ['list','map','stats','form'];
-    t.classList.toggle('active', names[i] === tab);
-  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
   document.getElementById(tab + 'Pane').classList.add('active');
+  if (tab !== 'list') clearSelection();
   if (tab === 'list') loadRecords();
   if (tab === 'map') loadMapView();
   if (tab === 'stats') loadStats();
 }
 
 // ── DATA ──
-function getRecords() {
-  let r = JSON.parse(localStorage.getItem('visitRecords')) || [];
-  return r.map(rec => {
-    if (!rec.id) rec.id = Date.now() + Math.random().toString(36).substr(2, 9);
-    if (!rec.dates) rec.dates = [rec.date];
+function readStore() {
+  try { return JSON.parse(localStorage.getItem('visitRecords')) || []; } catch (e) { return []; }
+}
+function writeStore(records) {
+  try { localStorage.setItem('visitRecords', JSON.stringify(records)); return true; }
+  catch (e) { toast('この端末に保存できませんでした'); return false; }
+}
+// 古い形式の記録（IDなし・date 1件だけ）を整えて、その結果を保存し直す
+function normalize(list) {
+  let changed = false;
+  const records = (Array.isArray(list) ? list : []).filter(r => r && typeof r === 'object').map(rec => {
+    if (!rec.id) { rec.id = newId(); changed = true; }
+    rec.id = String(rec.id);
+    if (!Array.isArray(rec.dates)) { rec.dates = rec.date ? [rec.date] : []; changed = true; }
+    const cleaned = rec.dates.filter(Boolean);
+    if (cleaned.length !== rec.dates.length) { rec.dates = cleaned; changed = true; }
+    if (!rec.gender) rec.gender = '未確認';
+    rec.name = rec.name || ''; rec.address = rec.address || '';
     return rec;
   });
+  return { records, changed };
+}
+function getRecords() {
+  const { records, changed } = normalize(readStore());
+  if (changed) writeStore(records);
+  return records;
 }
 
 // ── LIST ──
 function loadRecords() {
   const records = getRecords();
-  const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const query = (document.getElementById('searchInput').value || '').toLowerCase();
   const el = document.getElementById('recordsList');
-  el.innerHTML = '';
 
   let filtered = records;
   if (query) {
     filtered = records.filter(r =>
-      (r.name||'').toLowerCase().includes(query) ||
-      (r.address||'').toLowerCase().includes(query) ||
-      (r.remarks||'').toLowerCase().includes(query) ||
-      (r.phone||'').includes(query)
+      (r.name || '').toLowerCase().includes(query) ||
+      (r.address || '').toLowerCase().includes(query) ||
+      (r.remarks || '').toLowerCase().includes(query) ||
+      (r.phone || '').includes(query)
     );
   }
 
   if (filtered.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${query ? '検索結果なし' : 'まだ記録がありません'}</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${query ? '検索結果なし' : 'まだ記録がありません。「＋ 登録」から追加できます。'}</div></div>`;
+    toggleMultiBar();
     return;
   }
 
-  filtered.slice().reverse().forEach(record => {
-    const encAddr = encodeURIComponent(record.address);
-    const appleUrl = `maps://?q=${encAddr}`;
-    const googleUrl = `comgooglemaps://?q=${encAddr}`;
-    const safeAddr = record.address.replace(/'/g, "\\'");
-    const safeName = record.name.replace(/'/g, "\\'");
+  el.innerHTML = filtered.slice().reverse().map(record => {
+    const id = esc(record.id);
+    const datesHtml = record.dates.length
+      ? record.dates.map((d, i) => `
+        <span class="date-pill">
+          <span class="date-num">${i + 1}回</span>${esc(d)}
+          <button class="del-date" data-action="del-date" data-id="${id}" data-index="${i}" aria-label="${i + 1}回目の訪問日を削除">×</button>
+        </span>`).join('')
+      : '<span class="no-dates">訪問日なし</span>';
+    const phone = record.phone ? `<a href="tel:${esc(record.phone.replace(/[^\d+]/g, ''))}">${esc(record.phone)}</a>` : '未登録';
 
-    const datesHtml = record.dates.map((d, i) => `
-      <span class="date-pill">
-        <span class="date-num">${i+1}回</span>${d}
-        <button class="del-date" onclick="deleteSingleDate('${record.id}', ${i})">×</button>
-      </span>`).join('');
-
-    const card = document.createElement('div');
-    card.className = 'record-card';
-    card.id = 'card-' + record.id;
-    card.innerHTML = `
+    return `
+    <div class="record-card" id="card-${id}">
       <div class="card-top">
-        <input type="checkbox" class="card-checkbox select-record" value="${record.id}" onchange="toggleMultiBar(); click();">
-        <div class="card-name">${record.name}</div>
+        <input type="checkbox" class="card-checkbox select-record" value="${id}" aria-label="${esc(record.name)}を選択">
+        <div class="card-name">${esc(record.name)}</div>
         <span class="visit-badge">${record.dates.length}回</span>
       </div>
       <div class="card-body">
-        <div class="card-row">
-          <span class="card-row-label">電話</span>
-          <span class="card-row-val"><a href="tel:${record.phone||''}">${record.phone||'未登録'}</a></span>
-        </div>
-        <div class="card-row">
-          <span class="card-row-label">属性</span>
-          <span class="card-row-val">${record.age||'?'}歳 / ${record.gender} / ${record.nationality||'?'} / ${record.occupation||'?'}</span>
-        </div>
-        <div class="card-row">
-          <span class="card-row-label">住所</span>
-          <span class="card-row-val">${record.address}</span>
-        </div>
-        ${record.remarks ? `<div class="card-row"><span class="card-row-label">備考</span><span class="card-row-val" style="color:var(--text-faint);">${record.remarks}</span></div>` : ''}
+        <div class="card-row"><span class="card-row-label">電話</span><span class="card-row-val">${phone}</span></div>
+        <div class="card-row"><span class="card-row-label">属性</span><span class="card-row-val">${esc(record.age || '?')}歳 / ${esc(record.gender)} / ${esc(record.nationality || '?')} / ${esc(record.occupation || '?')}</span></div>
+        <div class="card-row"><span class="card-row-label">住所</span><span class="card-row-val">${esc(record.address)}</span></div>
+        ${record.remarks ? `<div class="card-row"><span class="card-row-label">備考</span><span class="card-row-val" style="color:var(--text-faint);">${esc(record.remarks)}</span></div>` : ''}
         <div class="dates-section">
           <div class="dates-title">訪問履歴</div>
           <div class="date-pill-list">${datesHtml}</div>
         </div>
       </div>
       <div class="card-actions">
-        <a href="${appleUrl}" class="map-btn btn-apple" onclick="click()">🍎<br>純正</a>
-        <a href="${googleUrl}" class="map-btn btn-google" onclick="click()">🗺<br>Google</a>
-        <a href="javascript:void(0);" class="map-btn btn-yahoo" onclick="clickYahooMap('${safeAddr}','${safeName}')">Y!<br>Yahoo</a>
-        <button class="act-btn btn-adddate" onclick="openDateModal('${record.id}','${safeName}')">＋<br>訪問日</button>
-        <button class="act-btn btn-edit" onclick="editRecord('${record.id}')">編集</button>
+        <a href="${esc(appleMapUrl(record.address))}" class="map-btn btn-apple" onclick="click()">🍎<br>純正</a>
+        <a href="${esc(googleMapUrl(record.address))}" class="map-btn btn-google" onclick="click()">🗺<br>Google</a>
+        <button class="map-btn btn-yahoo" data-action="yahoo" data-id="${id}">Y!<br>Yahoo</button>
+        <button class="act-btn btn-adddate" data-action="add-date" data-id="${id}">＋<br>訪問日</button>
+        <button class="act-btn btn-edit" data-action="edit" data-id="${id}">編集</button>
       </div>
-      <button class="btn-delete-card" onclick="deleteRecord('${record.id}')">この名簿を削除</button>
-    `;
-    el.appendChild(card);
-  });
+      <button class="btn-delete-card" data-action="delete" data-id="${id}">この名簿を削除</button>
+    </div>`;
+  }).join('');
   toggleMultiBar();
 }
+
+// カード内のボタンは ID だけで動かす（名前や住所をスクリプトに埋め込まない）
+document.getElementById('recordsList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  switch (btn.dataset.action) {
+    case 'del-date': deleteSingleDate(id, Number(btn.dataset.index)); break;
+    case 'add-date': openDateModal(id); break;
+    case 'edit': editRecord(id); break;
+    case 'delete': deleteRecord(id); break;
+    case 'yahoo': {
+      const r = getRecords().find(rec => rec.id === id);
+      if (r) openYahooMap(r.address, r.name);
+      break;
+    }
+  }
+});
+document.getElementById('recordsList').addEventListener('change', e => {
+  if (e.target.classList.contains('select-record')) {
+    click();
+    e.target.closest('.record-card').classList.toggle('selected', e.target.checked);
+    toggleMultiBar();
+  }
+});
 
 // ── MAP VIEW ──
 function loadMapView() {
   const records = getRecords();
+  const head = document.getElementById('mapHead');
   const el = document.getElementById('mapCardList');
-  el.innerHTML = '';
 
   if (records.length === 0) {
+    head.innerHTML = '';
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">🗺</div><div class="empty-text">訪問先を登録すると地図で確認できます</div></div>`;
     return;
   }
 
-  // Build OpenStreetMap with markers
-  const mapSection = document.createElement('div');
-  mapSection.style.cssText = 'position:relative; margin: 0; background: var(--surface2);';
-
-  // Create a simple map link area
-  const allAddresses = records.map(r => r.address);
-  const firstAddr = encodeURIComponent(records[0].address);
-
-  // Map iframe via OpenStreetMap (no API key needed)
-  const mapDiv = document.createElement('div');
-  mapDiv.style.cssText = 'width:100%; background:var(--surface2); border-bottom: 1px solid var(--border); overflow:hidden;';
-
-  // Try to create embedded map - use first record as center
-  const osmQuery = encodeURIComponent(records[0].address);
-  mapDiv.innerHTML = `
-    <div style="padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border);">
-      <span style="font-size:13px; color:var(--text-dim);">全${records.length}件の訪問先</span>
-      <a href="https://www.google.com/maps/search/${encodeURIComponent(allAddresses.join(' '))}/" 
-         style="font-size:12px; color:var(--accent); text-decoration:none; font-weight:600;" target="_blank">
-        Google Mapsで全件表示 →
-      </a>
+  const addrs = records.slice().reverse().map(r => r.address);
+  const over = addrs.length > 11;
+  head.innerHTML = `
+    <div class="map-head">
+      <span>全${records.length}件の訪問先</span>
+      <a href="${esc(googleWebRouteUrl(addrs.slice(0, 11)))}" target="_blank" rel="noopener" onclick="click()">Googleマップで${over ? '先頭11件を' : '全件を'}経路表示 →</a>
     </div>
-  `;
+    ${over ? '<p class="map-note">Googleマップの経路は最大11地点までです。</p>' : ''}`;
 
-  el.appendChild(mapDiv);
-
-  // List of places with map open buttons
-  records.slice().reverse().forEach((record, i) => {
-    const encAddr = encodeURIComponent(record.address);
-    const item = document.createElement('div');
-    item.className = 'map-list-item';
-    item.innerHTML = `
+  el.innerHTML = records.slice().reverse().map(record => `
+    <div class="map-list-item">
       <div class="map-pin">📍</div>
       <div class="map-item-info">
-        <div class="map-item-name">${record.name}</div>
-        <div class="map-item-addr">${record.address}</div>
-        <div class="map-item-visits" style="margin-top:3px;">${record.dates.length}回訪問 / 最終: ${record.dates[record.dates.length-1]}</div>
+        <div class="map-item-name">${esc(record.name)}</div>
+        <div class="map-item-addr">${esc(record.address)}</div>
+        <div class="map-item-visits">${record.dates.length}回訪問 / 最終: ${esc(record.dates[record.dates.length - 1] || 'なし')}</div>
       </div>
       <div style="display:flex; flex-direction:column; gap:5px; flex-shrink:0;">
-        <button class="map-open-btn" onclick="openMapForRecord('${record.id}','apple')" style="background:#1c1c1e; border:1px solid #444;">🍎</button>
-        <button class="map-open-btn" onclick="openMapForRecord('${record.id}','google')">🗺</button>
+        <a class="map-open-btn btn-apple" href="${esc(appleMapUrl(record.address))}" onclick="click()" aria-label="純正マップで開く">🍎</a>
+        <a class="map-open-btn" href="${esc(googleMapUrl(record.address))}" onclick="click()" aria-label="Googleマップで開く">🗺</a>
       </div>
-    `;
-    el.appendChild(item);
-  });
-}
-
-function openMapForRecord(id, type) {
-  click();
-  const records = getRecords();
-  const r = records.find(rec => rec.id === id);
-  if (!r) return;
-  const enc = encodeURIComponent(r.address);
-  if (type === 'apple') window.open(`maps://?q=${enc}`);
-  else if (type === 'google') window.open(`comgooglemaps://?q=${enc}`);
+    </div>`).join('');
 }
 
 // ── STATS ──
@@ -741,7 +867,7 @@ function loadStats() {
   const records = getRecords();
   const total = records.length;
   const totalVisits = records.reduce((s, r) => s + r.dates.length, 0);
-  const maxVisits = records.length > 0 ? Math.max(...records.map(r => r.dates.length)) : 0;
+  const maxVisits = total > 0 ? Math.max(...records.map(r => r.dates.length)) : 0;
   const avgVisits = total > 0 ? (totalVisits / total).toFixed(1) : 0;
 
   document.getElementById('statsGrid').innerHTML = `
@@ -762,35 +888,17 @@ function loadStats() {
     return `
       <div class="rank-item">
         <span class="rank-num">${i + 1}</span>
-        <span class="rank-name">${r.name}</span>
+        <span class="rank-name">${esc(r.name)}</span>
         <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%"></div></div>
         <span class="rank-count">${r.dates.length}回</span>
       </div>`;
   }).join('');
 }
 
-// ── YAHOO MAP ──
-function clickYahooMap(address, name) {
-  click();
-  const cleanAddr = address.split(/[\s　]/)[0];
-  fetch(`https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(cleanAddr)}`)
-    .then(r => r.json())
-    .then(data => {
-      if (data && data.length > 0 && data[0].geometry) {
-        const lon = data[0].geometry.coordinates[0];
-        const lat = data[0].geometry.coordinates[1];
-        window.location.href = `yjmap://pin/?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name||address)}`;
-      } else {
-        window.location.href = `yjmap://search?q=${encodeURIComponent(address)}`;
-      }
-    })
-    .catch(() => { window.location.href = `yjmap://search?q=${encodeURIComponent(address)}`; });
-}
-
 // ── SAVE / EDIT ──
 function saveRecord() {
   const editId = document.getElementById('editId').value;
-  const date = document.getElementById('visitDate').value;
+  const date = document.getElementById('visitDate').value || todayStr();
   const name = document.getElementById('name').value.trim();
   const age = document.getElementById('age').value;
   const gender = document.getElementById('gender').value;
@@ -800,18 +908,19 @@ function saveRecord() {
   const address = document.getElementById('address').value.trim();
   const remarks = document.getElementById('remarks').value.trim();
 
-  if (!name || !address) { alert('名前と住所は必須です。'); return; }
+  const err = document.getElementById('formError');
+  if (!name || !address) { err.hidden = false; sad(); return; }
+  err.hidden = true;
 
-  let records = getRecords();
+  const records = getRecords();
   if (editId) {
     const idx = records.findIndex(r => r.id === editId);
-    if (idx !== -1) {
-      Object.assign(records[idx], { name, age, gender, nationality, occupation, phone, address, remarks });
-    }
+    if (idx !== -1) Object.assign(records[idx], { name, age, gender, nationality, occupation, phone, address, remarks });
   } else {
-    records.push({ id: Date.now().toString(), dates: [date], name, age, gender, nationality, occupation, phone, address, remarks });
+    records.push({ id: newId(), dates: [date], name, age, gender, nationality, occupation, phone, address, remarks });
   }
-  localStorage.setItem('visitRecords', JSON.stringify(records));
+  if (!writeStore(records)) return;
+  toast(editId ? '更新しました' : '登録しました');
   resetForm(); chime();
   switchTab('list');
 }
@@ -822,66 +931,64 @@ function editRecord(id) {
   if (!r) return;
   document.getElementById('editId').value = r.id;
   document.getElementById('name').value = r.name;
-  document.getElementById('age').value = r.age;
-  document.getElementById('gender').value = r.gender;
+  document.getElementById('age').value = r.age || '';
+  document.getElementById('gender').value = r.gender || '未確認';
   document.getElementById('nationality').value = r.nationality || '';
   document.getElementById('occupation').value = r.occupation || '';
   document.getElementById('phone').value = r.phone || '';
   document.getElementById('address').value = r.address;
   document.getElementById('remarks').value = r.remarks || '';
-  document.getElementById('dateInputGroup').style.display = 'none';
+  document.getElementById('dateInputGroup').hidden = true;
   document.getElementById('submitBtn').textContent = '更新する';
   document.getElementById('submitBtn').classList.add('edit-mode');
-  document.getElementById('cancelBtn').style.display = 'block';
+  document.getElementById('cancelBtn').hidden = false;
   switchTab('form');
 }
 
 function resetForm() {
-  document.getElementById('editId').value = '';
-  document.getElementById('name').value = '';
-  document.getElementById('age').value = '';
+  ['editId', 'name', 'age', 'nationality', 'occupation', 'phone', 'address', 'remarks'].forEach(f => document.getElementById(f).value = '');
   document.getElementById('gender').value = '未確認';
-  document.getElementById('nationality').value = '';
-  document.getElementById('occupation').value = '';
-  document.getElementById('phone').value = '';
-  document.getElementById('address').value = '';
-  document.getElementById('remarks').value = '';
-  document.getElementById('visitDate').valueAsDate = new Date();
-  document.getElementById('dateInputGroup').style.display = 'block';
+  document.getElementById('visitDate').value = todayStr();
+  document.getElementById('dateInputGroup').hidden = false;
   document.getElementById('submitBtn').textContent = '登録する';
   document.getElementById('submitBtn').classList.remove('edit-mode');
-  document.getElementById('cancelBtn').style.display = 'none';
+  document.getElementById('cancelBtn').hidden = true;
+  document.getElementById('formError').hidden = true;
 }
 
 function cancelEdit() { click(); resetForm(); switchTab('list'); }
 
-function deleteRecord(id) {
-  if (!confirm('この名簿を完全に削除しますか？')) return;
-  let records = getRecords().filter(r => r.id !== id);
-  localStorage.setItem('visitRecords', JSON.stringify(records));
+async function deleteRecord(id) {
+  click();
+  const r = getRecords().find(rec => rec.id === id);
+  if (!r) return;
+  if (!await askConfirm('名簿を削除', `「${r.name}」さんの記録をすべて削除します。元に戻せません。`)) return;
+  writeStore(getRecords().filter(rec => rec.id !== id));
+  loadRecords(); sad(); toast('削除しました');
+}
+
+async function deleteSingleDate(recordId, dateIndex) {
+  click();
+  const records = getRecords();
+  const idx = records.findIndex(r => r.id === recordId);
+  if (idx === -1) return;
+  const d = records[idx].dates[dateIndex];
+  if (!await askConfirm('訪問日を削除', `${records[idx].name}さんの ${d} の訪問日を削除します。`)) return;
+  records[idx].dates.splice(dateIndex, 1);
+  writeStore(records);
   loadRecords(); sad();
 }
 
-function deleteSingleDate(recordId, dateIndex) {
-  if (!confirm('この訪問日を削除しますか？')) return;
-  let records = getRecords();
-  const idx = records.findIndex(r => r.id === recordId);
-  if (idx !== -1) {
-    records[idx].dates.splice(dateIndex, 1);
-    localStorage.setItem('visitRecords', JSON.stringify(records));
-    loadRecords(); sad();
-  }
-}
-
 // ── DATE MODAL ──
-function openDateModal(id, name) {
+function openDateModal(id) {
   click();
+  const r = getRecords().find(rec => rec.id === id);
+  if (!r) return;
   document.getElementById('targetIdForDate').value = id;
-  document.getElementById('targetNameForDate').textContent = name + ' さんの訪問日';
-  document.getElementById('newVisitDateInput').valueAsDate = new Date();
-  document.getElementById('dateModal').classList.add('open');
+  document.getElementById('targetNameForDate').textContent = r.name + ' さんの訪問日';
+  document.getElementById('newVisitDateInput').value = todayStr();
+  openModal('dateModal');
 }
-function closeDateModal() { click(); document.getElementById('dateModal').classList.remove('open'); }
 function confirmAddDate() {
   const id = document.getElementById('targetIdForDate').value;
   const newDate = document.getElementById('newVisitDateInput').value;
@@ -890,73 +997,100 @@ function confirmAddDate() {
   const idx = records.findIndex(r => r.id === id);
   if (idx !== -1) {
     records[idx].dates.push(newDate);
-    localStorage.setItem('visitRecords', JSON.stringify(records));
-    loadRecords(); chime(); closeDateModal();
+    records[idx].dates.sort();
+    writeStore(records);
+    loadRecords(); chime();
+    document.getElementById('dateModal').classList.remove('open');
+    toast('訪問日を追加しました');
   }
 }
 
 // ── MULTI MAP ──
-function toggleMultiBar() {
-  const checked = document.querySelectorAll('.select-record:checked');
-  const bar = document.getElementById('multiBar');
-  const label = document.getElementById('multiBarLabel');
-  if (checked.length > 0) {
-    bar.classList.add('visible');
-    label.textContent = `${checked.length}件選択中`;
-  } else {
-    bar.classList.remove('visible');
-  }
-}
-
-function openMultipleOnMap(type) {
-  click();
-  const checked = document.querySelectorAll('.select-record:checked');
+function selectedRecords() {
   const records = getRecords();
-  const sel = Array.from(checked).map(cb => records.find(r => r.id === cb.value)).filter(Boolean);
-
-  if (sel.length === 1) {
-    const enc = encodeURIComponent(sel[0].address);
-    if (type === 'apple') window.open(`maps://?q=${enc}`);
-    else if (type === 'google') window.open(`comgooglemaps://?q=${enc}`);
-    else clickYahooMap(sel[0].address, sel[0].name);
-  } else if (sel.length === 2) {
-    const s = encodeURIComponent(sel[0].address), d = encodeURIComponent(sel[1].address);
-    if (type === 'apple') window.open(`maps://?saddr=${s}&daddr=${d}`);
-    else if (type === 'google') window.open(`comgooglemaps://?saddr=${s}&daddr=${d}`);
-    else { alert('Yahoo!マップは2件以上の経路に対応していません。'); clickYahooMap(sel[1].address, sel[1].name); }
-  } else {
-    const s = encodeURIComponent(sel[0].address), d = encodeURIComponent(sel[sel.length-1].address);
-    if (type !== 'google') alert('3件以上の経路はGoogleマップで開きます。');
-    window.open(`comgooglemaps://?saddr=${s}&daddr=${d}`);
-  }
-
-  checked.forEach(cb => cb.checked = false);
+  return Array.from(document.querySelectorAll('.select-record:checked'))
+    .map(cb => records.find(r => r.id === cb.value)).filter(Boolean);
+}
+function toggleMultiBar() {
+  const sel = selectedRecords();
+  const bar = document.getElementById('multiBar');
+  if (sel.length === 0) { bar.classList.remove('visible'); return; }
+  bar.classList.add('visible');
+  document.getElementById('multiBarLabel').textContent = `${sel.length}件選択中`;
+  const addrs = sel.map(r => r.address);
+  const apple = document.getElementById('multiApple');
+  const yahoo = document.getElementById('multiYahoo');
+  document.getElementById('multiGoogle').href = googleRouteUrl(addrs);
+  // 純正マップは2地点まで、Yahoo は1地点のみ対応
+  apple.hidden = addrs.length > 2;
+  apple.href = appleRouteUrl(addrs);
+  yahoo.hidden = addrs.length > 1;
+}
+function multiYahoo() {
+  const sel = selectedRecords();
+  if (sel.length === 1) openYahooMap(sel[0].address, sel[0].name);
+  setTimeout(clearSelection, 300);
+}
+function afterMultiOpen() {
+  click();
+  setTimeout(clearSelection, 300);
+}
+function clearSelection() {
+  document.querySelectorAll('.select-record:checked').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.record-card')?.classList.remove('selected');
+  });
   toggleMultiBar();
 }
 
 // ── BACKUP ──
-function exportData() {
+function openExportModal() {
   save();
-  const data = localStorage.getItem('visitRecords');
-  if (!data) { alert('データがありません。'); return; }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
-  a.download = `visit_records_${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
+  const records = getRecords();
+  if (records.length === 0) { toast('保存するデータがありません'); return; }
+  document.getElementById('exportBox').value = JSON.stringify(records);
+  openModal('exportModal');
 }
-function importData(event) {
+function downloadExport() {
+  save();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([document.getElementById('exportBox').value], { type: 'application/json' }));
+  a.download = `visit_records_${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function copyExport() {
+  const box = document.getElementById('exportBox');
+  const fallback = () => { box.focus(); box.select(); toast('選択しました。長押しでコピーしてください'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(box.value).then(() => { chime(); toast('コピーしました'); }, fallback);
+  } else fallback();
+}
+function openImportModal() {
+  click();
+  document.getElementById('importBox').value = '';
+  document.getElementById('importFile').value = '';
+  document.getElementById('importError').hidden = true;
+  openModal('importModal');
+}
+function importFromFile(event) {
   const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (Array.isArray(data)) {
-        localStorage.setItem('visitRecords', JSON.stringify(data));
-        loadRecords(); chime(); alert('復元完了！');
-      } else alert('正しいデータファイルではありません。');
-    } catch { alert('読み込みに失敗しました。'); }
-  };
+  reader.onload = e => { document.getElementById('importBox').value = e.target.result; };
   reader.readAsText(file);
+}
+async function importFromText() {
+  const err = document.getElementById('importError');
+  let data;
+  try { data = JSON.parse(document.getElementById('importBox').value); }
+  catch { err.textContent = 'データを読み込めませんでした。保存したデータをそのまま貼り付けてください。'; err.hidden = false; return; }
+  if (!Array.isArray(data)) { err.textContent = '正しいデータではありません。'; err.hidden = false; return; }
+  err.hidden = true;
+  document.getElementById('importModal').classList.remove('open');
+  if (getRecords().length > 0 &&
+      !await askConfirm('データを復元', `今の記録を、復元データ（${data.length}件）で置き換えます。`, '置き換える')) return;
+  writeStore(normalize(data).records);
+  switchTab('list'); chime(); toast('復元しました');
 }
 
 // ── TABLE MODAL ──
@@ -966,16 +1100,16 @@ function buildPrintHTML(records) {
 
   const cardsHtml = records.map(r => {
     const allDates = r.dates.map((d, idx) =>
-      `<tr><td style="color:#666;padding:1px 3px;font-size:9px;">${idx+1}回</td><td style="padding:1px 3px;font-size:9px;">${d}</td></tr>`
+      `<tr><td style="color:#666;padding:1px 3px;font-size:9px;">${idx + 1}回</td><td style="padding:1px 3px;font-size:9px;">${esc(d)}</td></tr>`
     ).join('');
     return `<td style="width:${CARD_W}px;min-width:${CARD_W}px;vertical-align:top;padding:4px;">
       <div style="border:1px solid #bbb;border-radius:6px;padding:8px;background:#fff;height:100%;box-sizing:border-box;">
-        <div style="font-size:12px;font-weight:bold;color:#000;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:5px;word-break:break-all;">${r.name}</div>
-        <div style="font-size:9px;color:#0070e0;margin-bottom:3px;">☎ ${r.phone||'未登録'}</div>
-        <div style="font-size:9px;color:#444;margin-bottom:2px;">${r.age||'?'}歳・${r.gender}</div>
-        <div style="font-size:9px;color:#444;margin-bottom:2px;">${r.nationality||'?'}・${r.occupation||'?'}</div>
-        <div style="font-size:9px;color:#333;margin-bottom:5px;word-break:break-all;line-height:1.5;">${r.address}</div>
-        ${r.remarks ? `<div style="font-size:9px;color:#888;margin-bottom:5px;border-left:2px solid #ddd;padding-left:4px;word-break:break-all;">${r.remarks}</div>` : ''}
+        <div style="font-size:12px;font-weight:bold;color:#000;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:5px;word-break:break-all;">${esc(r.name)}</div>
+        <div style="font-size:9px;color:#0070e0;margin-bottom:3px;">☎ ${esc(r.phone || '未登録')}</div>
+        <div style="font-size:9px;color:#444;margin-bottom:2px;">${esc(r.age || '?')}歳・${esc(r.gender)}</div>
+        <div style="font-size:9px;color:#444;margin-bottom:2px;">${esc(r.nationality || '?')}・${esc(r.occupation || '?')}</div>
+        <div style="font-size:9px;color:#333;margin-bottom:5px;word-break:break-all;line-height:1.5;">${esc(r.address)}</div>
+        ${r.remarks ? `<div style="font-size:9px;color:#888;margin-bottom:5px;border-left:2px solid #ddd;padding-left:4px;word-break:break-all;">${esc(r.remarks)}</div>` : ''}
         <div style="background:#f5f5f5;border-radius:4px;padding:4px;">
           <div style="font-size:9px;font-weight:bold;color:#333;margin-bottom:2px;">訪問履歴 ${r.dates.length}回</div>
           <table style="border-collapse:collapse;width:100%;">${allDates}</table>
@@ -984,8 +1118,8 @@ function buildPrintHTML(records) {
     </td>`;
   }).join('');
 
-  return `<div id="printRoot" style="background:#e8e8ed;padding:10px;display:inline-block;">
-    <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;min-width:100%;">
+  return `<div id="printRoot" style="background:#e8e8ed;padding:10px;display:inline-block;font-family:'Noto Sans JP',sans-serif;">
+    <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:16px;min-width:100%;">
       <span style="font-size:13px;font-weight:bold;color:#1c1c1e;">実践訪問先　記録一覧</span>
       <span style="font-size:10px;color:#666;">${today}　全${records.length}件</span>
     </div>
@@ -998,56 +1132,56 @@ function buildPrintHTML(records) {
 function openTableModal() {
   click();
   const records = getRecords();
-  const captureArea = document.getElementById('captureArea');
-  captureArea.style.cssText = 'overflow-x:auto;overflow-y:auto;max-height:52vh;background:white;padding:4px;border-radius:8px;';
-  captureArea.innerHTML = buildPrintHTML(records);
-  document.getElementById('saveImgBtn').style.display = 'block';
-  document.getElementById('tableModal').classList.add('open');
+  if (records.length === 0) { toast('まだ記録がありません'); return; }
+  document.getElementById('captureArea').innerHTML = buildPrintHTML(records);
+  document.getElementById('saveImgBtn').hidden = false;
+  openModal('tableModal');
 }
-
-function closeTableModal() { click(); document.getElementById('tableModal').classList.remove('open'); }
 
 function saveAsImage() {
   save();
-  const records = getRecords();
+  if (typeof html2canvas !== 'function') { toast('画像の作成機能を読み込めませんでした'); return; }
+  const btn = document.getElementById('saveImgBtn');
+  btn.textContent = '作成中…'; btn.disabled = true;
 
-  // オフスクリーンのdivに描画してからキャプチャ（白紙対策）
+  // 画面外に描画してからキャプチャ（白紙対策）
   const offscreen = document.createElement('div');
   offscreen.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;';
-  offscreen.innerHTML = buildPrintHTML(records);
+  offscreen.innerHTML = buildPrintHTML(getRecords());
   document.body.appendChild(offscreen);
-
   const target = offscreen.querySelector('#printRoot');
 
-  // レンダリングが確定するまで少し待ってからキャプチャ
   requestAnimationFrame(() => {
     setTimeout(() => {
       html2canvas(target, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#e8e8ed',
-        logging: false,
-        width: target.scrollWidth,
-        height: target.scrollHeight,
+        scale: 2, useCORS: true, backgroundColor: '#e8e8ed', logging: false,
+        width: target.scrollWidth, height: target.scrollHeight,
         windowWidth: target.scrollWidth + 100,
       }).then(canvas => {
-        document.body.removeChild(offscreen);
         const img = canvas.toDataURL('image/jpeg', 0.95);
-        const captureArea = document.getElementById('captureArea');
-        captureArea.style.cssText = 'overflow-x:auto;overflow-y:auto;max-height:52vh;background:white;padding:4px;border-radius:8px;';
-        captureArea.innerHTML = `
+        document.getElementById('captureArea').innerHTML = `
           <div style="text-align:center;margin-bottom:10px;">
             <p style="color:#ff3b30;font-weight:bold;font-size:14px;">👇 下の画像を長押しして「写真に保存」</p>
           </div>
-          <img src="${img}" style="width:100%;border-radius:4px;display:block;">`;
-        document.getElementById('saveImgBtn').style.display = 'none';
-      });
+          <img src="${img}" alt="訪問記録一覧の画像" style="width:100%;border-radius:4px;display:block;">`;
+        btn.hidden = true;
+      }).catch(() => toast('画像を作成できませんでした'))
+        .finally(() => {
+          offscreen.remove();
+          btn.textContent = '📸 画像に変換して保存'; btn.disabled = false;
+        });
     }, 300);
   });
 }
 
+// 背景をタップしたらモーダルを閉じる（確認モーダルは除く）
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  if (ov.id === 'confirmModal') return;
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+});
+
 // ── INIT ──
-document.getElementById('visitDate').valueAsDate = new Date();
+document.getElementById('visitDate').value = todayStr();
 loadRecords();
 </script>
 </body>
