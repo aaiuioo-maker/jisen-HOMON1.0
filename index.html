@@ -85,7 +85,9 @@ body {
   padding: 10px 12px;
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
 }
-.topbar-title { font-size: 18px; font-weight: 700; white-space: nowrap; }
+/* 文字の大きさは、下のスクリプト（fitTitle）でボタンの手前までぎりぎり大きくしている */
+.topbar-title { font-size: 18px; font-weight: 700; white-space: nowrap; line-height: 1.1; }
+.topbar-left { flex: 1; }
 .topbar-left { display: flex; align-items: center; min-width: 0; }
 /* 画像保存・データ保存・復元は、タイトル「実践訪問先」のすぐ右に並べる */
 .topbar-actions { margin-left: auto; flex-shrink: 0; }
@@ -214,29 +216,13 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
 
-/* ── SEARCH ── */
-.search-wrap { position: relative; margin-bottom: 10px; }
+/* ── すべてにチェック ── */
 .check-all-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
 .check-all-btn {
   padding: 4px 9px; border-radius: 8px; border: 1px solid var(--border);
   background: var(--surface); color: var(--accent); font-size: 10px; font-weight: 700; font-family: var(--font); cursor: pointer;
 }
 .check-all-btn:active { background: var(--surface3); }
-.search-wrap input {
-  width: 100%; padding: 10px 12px 10px 38px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text); font-size: 16px;
-  font-family: var(--font); outline: none;
-  transition: border-color 0.2s;
-}
-.search-wrap input:focus { border-color: var(--accent); }
-.search-icon {
-  position: absolute; left: 12px; top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-faint); font-size: 15px; pointer-events: none;
-}
 
 /* ── RECORD CARDS ── */
 .cards-list { display: flex; flex-direction: column; gap: 10px; }
@@ -582,10 +568,6 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 
 <!-- LIST PANE -->
 <div class="pane active" id="listPane">
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="名前・住所・備考で検索…" oninput="loadRecords()">
-  </div>
   <div class="check-all-row">
     <button type="button" class="check-all-btn" id="checkAllBtn" onclick="toggleCheckAll()" hidden>☑ すべてにチェック</button>
   </div>
@@ -793,7 +775,7 @@ function opKey(d){
     '名前の横にチェックを入れると、選んだ記録だけを画像にできます',
     '「画像保存」で、記録の一覧を1枚の画像にできます',
     '「データ保存」でバックアップを取っておくと安心です',
-    '名前・住所・備考の言葉で、記録をさがせます',
+    '「すべてにチェック」で、全員の記録を1枚の画像にできます',
     '電話番号をタップすると、そのまま電話をかけられます'];
   document.getElementById('optip').textContent='ひとこと：'+TIPS[Math.floor(Math.random()*TIPS.length)];
   let started=false;
@@ -960,22 +942,11 @@ function getRecords() {
 
 // ── LIST ──
 function loadRecords() {
-  const records = getRecords();
-  const query = (document.getElementById('searchInput').value || '').toLowerCase();
+  const filtered = getRecords();
   const el = document.getElementById('recordsList');
 
-  let filtered = records;
-  if (query) {
-    filtered = records.filter(r =>
-      (r.name || '').toLowerCase().includes(query) ||
-      (r.address || '').toLowerCase().includes(query) ||
-      (r.remarks || '').toLowerCase().includes(query) ||
-      (r.phone || '').includes(query)
-    );
-  }
-
   if (filtered.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">${query ? '検索結果なし' : 'まだ記録がありません。「＋ 登録」から追加できます。'}</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">まだ記録がありません。「＋ 登録」から追加できます。</div></div>`;
     toggleMultiBar();
     return;
   }
@@ -1389,9 +1360,24 @@ document.querySelectorAll('.modal-overlay').forEach(ov => {
   });
 })();
 
+// タイトル「実践訪問先」を、右のボタンの手前までぎりぎり大きくする（画面の幅が変わったら合わせ直す）
+function fitTitle() {
+  const t = document.querySelector('.topbar-title');
+  if (!t) return;
+  const left = t.getBoundingClientRect().left;
+  const right = document.querySelector('.topbar-actions').getBoundingClientRect().left - 6;
+  t.style.fontSize = '16px';
+  const per = t.scrollWidth / 16;              // 1pxあたりの文字の幅
+  const size = Math.max(16, Math.min(30, Math.floor((right - left) / per)));
+  t.style.fontSize = size + 'px';
+}
+window.addEventListener('resize', fitTitle);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle);
+
 // ── INIT ──
 document.getElementById('visitDate').value = todayStr();
 loadRecords();
+fitTitle();
 
 // =============================================================
 // キャラクターのいろいろな動き（見本ページ https://claude.ai/artifact/L4sFgs3LjxX7Rcd4s6ugBM と同じもの）
