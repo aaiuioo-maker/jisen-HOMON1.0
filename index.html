@@ -47,36 +47,33 @@ body {
   padding-bottom: 90px;
 }
 
-/* ── SPLASH ── */
-#splashScreen {
-  position: fixed; inset: 0;
-  background: var(--bg);
-  z-index: 9999;
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center; gap: 20px;
-  transition: opacity 0.7s ease;
-  cursor: pointer;
-}
-.splash-logo {
-  font-size: 13px; letter-spacing: 6px; color: var(--text-dim);
-  font-family: var(--mono); text-transform: uppercase;
-}
-.splash-title {
-  font-size: 38px; font-weight: 700; letter-spacing: 2px;
-  background: linear-gradient(135deg, #1c1c1e 0%, var(--accent) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.splash-hint { font-size: 12px; color: var(--text-faint); }
-.splash-pulse {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--accent); margin-top: 10px;
-  animation: pulse 1.4s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.8); opacity: 0.4; }
-}
-@media (prefers-reduced-motion: reduce) { .splash-pulse { animation: none; } }
+/* === オープニング（開いたときに出る画面。近畿発の運賃表・よく行く場所と同じ作りで、色はアイコンに合わせた青） === */
+.op{position:fixed;inset:0;z-index:600;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(#2f86f6,#0a5fd1);color:#fff;cursor:pointer;transition:opacity .5s,visibility .5s;overflow:auto;font-family:-apple-system,'Helvetica Neue',sans-serif}
+.op.hide{opacity:0;visibility:hidden}
+.op-in{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.op-sub{margin:0;font-size:.85rem;font-weight:700;background:#fff;color:#0a5fd1;border-radius:999px;padding:3px 14px;animation:op-drop .5s both}
+.op-t{margin:0;display:flex;flex-direction:column;line-height:1.15;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.15)}
+.op-t span{font-size:2.1rem;animation:op-drop .6s .1s both}
+.op-t b{font-size:3.2rem;letter-spacing:.1em;animation:op-drop .6s .25s both}
+/* キャラクターの台（白いカード）：青地だとオレンジが見えにくいので白の上に置く */
+.op-chars{display:flex;align-items:flex-end;justify-content:center;gap:26px;background:#fff;border-radius:18px;padding:16px 24px 10px;box-shadow:0 6px 0 rgba(0,0,0,.15);animation:op-rise .6s .4s both}
+.op-c{display:flex;flex-direction:column;align-items:center;gap:6px;font:10px -apple-system,"Segoe UI",sans-serif;letter-spacing:.05em}
+.op-cc{width:102px;height:69px;shape-rendering:crispEdges;overflow:visible}
+.op-c.cc span{color:#d97757}
+.op-gh{--gh-disc:#24292f;--gh-cat:#fff;color:#57606a}
+.op-gh svg{width:48px;height:48px;overflow:visible}   /* オレンジの体（頭から足先まで48px）と高さをそろえる */
+.op-gh.spin .gh-all{animation:gh-spin .7s cubic-bezier(.34,1.4,.64,1)}
+.op-hello{margin:0;font-size:1rem;font-weight:700;animation:op-rise .6s .55s both}
+.op-tip{margin:0;font-size:.85rem;line-height:1.5;min-height:3em;background:rgba(0,0,0,.14);border-radius:10px;padding:8px 12px;animation:op-rise .6s .65s both}
+.op-bar{width:72%;height:6px;background:rgba(255,255,255,.3);border-radius:3px;overflow:hidden}
+.op-bar i{display:block;height:100%;width:0;background:#fff;transition:width 1.5s linear}
+.op-go{font:inherit;font-weight:700;font-size:1.05rem;background:#fff;color:#0a5fd1;border:0;border-radius:999px;padding:12px 30px;box-shadow:0 4px 0 rgba(0,0,0,.18);animation:op-pulse 1.4s ease-in-out infinite;cursor:pointer}
+.op-go.busy{animation:none;opacity:.85}
+@keyframes op-drop{from{transform:translateY(-24px);opacity:0}}
+@keyframes op-rise{from{transform:translateY(20px);opacity:0}}
+@keyframes op-pulse{50%{transform:scale(1.06)}}
+@media (prefers-reduced-motion:reduce){.op *{animation:none!important}}
+
 
 /* ── TOPBAR ── */
 .topbar {
@@ -477,13 +474,45 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 </div>
 <!-- ===== ここまで キャラクターの自己紹介 ===== -->
 
-<!-- SPLASH -->
-<div id="splashScreen" onclick="startApp()">
-  <p class="splash-logo">Field Visit Manager</p>
-  <h1 class="splash-title">実践訪問先</h1>
-  <p class="splash-hint">タップして開始</p>
-  <div class="splash-pulse"></div>
+<!-- オープニング：タップすると音が鳴って、いつもの画面に切りかわる（近畿発の運賃表と同じ作り） -->
+<div class="op" id="op" role="dialog" aria-label="オープニング">
+  <div class="op-in">
+    <p class="op-sub">訪問の記録を ひとまとめに</p>
+    <h2 class="op-t"><span>実践</span><b>訪問先</b></h2>
+    <div class="op-chars">
+      <div class="op-c cc"><svg class="op-anim op-cc" viewBox="0 -7 34 23" data-skip="60" aria-hidden="true"></svg><span>Claude Code</span></div>
+      <div class="op-c op-gh">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <defs><clipPath id="ghClipOp"><circle cx="8" cy="8" r="8"/></clipPath></defs>
+          <g class="gh-all">
+            <circle class="gh-disc" cx="8" cy="8" r="8"/>
+            <g clip-path="url(#ghClipOp)">
+              <path class="gh-cat" d="M6.75 10.3 C6.45 10.7 6.3 11.2 6.3 11.8 L6.3 15.1 Q6.3 15.6 6.8 15.6 L9.2 15.6 Q9.7 15.6 9.7 15.1 L9.7 11.8 C9.7 11.2 9.55 10.7 9.25 10.3 Z"/>
+              <g class="gh-head">
+                <path class="gh-cat" d="M4.15 4.75 C3.85 3.85 3.95 2.85 4.3 2.1 C4.3 2.1 5.05 1.95 6.35 2.9 C6.9 2.75 7.45 2.68 8 2.68 C8.55 2.68 9.1 2.75 9.65 2.9 C10.95 1.95 11.7 2.1 11.7 2.1 C12.05 2.85 12.15 3.85 11.85 4.75 C12.4 5.3 12.75 6.0 12.75 6.95 C12.75 9.75 10.95 10.45 8 10.55 C5.05 10.45 3.25 9.75 3.25 6.95 C3.25 6.0 3.6 5.3 4.15 4.75 Z"/>
+                <rect class="gh-eyes" x="5.5" y="6.1" width="1" height="1.5" rx="0.5"/>
+                <rect class="gh-eyes" x="9.5" y="6.1" width="1" height="1.5" rx="0.5"/>
+              </g>
+              <g class="gh-tail">
+                <path class="gh-tail-line" d="M6.5 12.35 C5.3 12.55 4.65 12.0 4.25 11.25 C3.95 10.7 3.6 10.35 3.0 10.25"/>
+                <circle class="gh-dot" cx="5.5" cy="12.2" r="0.17"/>
+                <circle class="gh-dot" cx="4.75" cy="11.75" r="0.17"/>
+                <circle class="gh-dot" cx="4.25" cy="11.05" r="0.17"/>
+                <circle class="gh-dot" cx="3.7" cy="10.5" r="0.17"/>
+              </g>
+            </g>
+          </g>
+        </svg>
+        <span>GitHub</span>
+      </div>
+    </div>
+    <p class="op-hello" id="ophello"></p>
+    <p class="op-tip" id="optip"></p>
+    <div class="op-bar"><i id="opbar"></i></div>
+    <button class="op-go" id="opgo" type="button">タップしてはじめる</button>
+  </div>
 </div>
+
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -722,12 +751,102 @@ const chime = () => { playTone(523, 'square', 0.1, 0); playTone(659, 'square', 0
 const sad = () => { playTone(200, 'sawtooth', 0.15, 0); playTone(150, 'sawtooth', 0.3, 0.15); };
 const save = () => { playTone(440, 'square', 0.1, 0); playTone(554, 'square', 0.1, 0.1); playTone(880, 'square', 0.2, 0.2); };
 
-function startApp() {
-  initAudio(); chime();
-  const s = document.getElementById('splashScreen');
-  s.style.opacity = '0';
-  setTimeout(() => s.hidden = true, 700);
+/* ── オープニング：タップすると、カタカタ（キーボード）→ ピロリン の音が鳴り、
+   白いバーが伸びきったらいつもの画面に切りかわる。準備中にもう一度タップするとすぐ閉じる（近畿発の運賃表と同じ） ── */
+// ピコッという音（近畿発の運賃表と同じ鳴らし方）
+function opTone(f,t,d,v){
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type='square';o.frequency.value=f;
+  g.gain.setValueAtTime(1e-4,t);
+  g.gain.exponentialRampToValueAtTime(v,t+.005);
+  g.gain.exponentialRampToValueAtTime(1e-4,t+d);
+  o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+d+.02);
 }
+// カタッ（キーボードを打つ音）。d 秒あとに鳴らす
+function opKey(d){
+  try{
+    const c=audioCtx,t=c.currentTime+.01+d,len=Math.floor(c.sampleRate*.03);
+    const buf=c.createBuffer(1,len,c.sampleRate),a=buf.getChannelData(0);
+    for(let i=0;i<len;i++)a[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+    const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+    s.buffer=buf;f.type='highpass';f.frequency.value=1500+Math.random()*900;g.gain.value=.4;
+    s.connect(f).connect(g).connect(c.destination);s.start(t);
+  }catch(_){}
+}
+(function opening(){
+  const op=document.getElementById('op');
+  if(!op)return;
+  const h=new Date().getHours();
+  document.getElementById('ophello').textContent=h<5?'夜おそくまで、おつかれさまです':h<11?'おはようございます':h<17?'こんにちは':'おつかれさまです';
+  const TIPS=[
+    '登録のとき、郵便番号を7けた入れると住所が出ます',
+    '2回目からの訪問は、カードの「＋ 訪問日」で足せます',
+    'カードにチェックを入れると、選んだ訪問先を地図アプリの経路で回れます',
+    '「画像保存」で、記録の一覧を1枚の画像にできます',
+    '「データ保存」でバックアップを取っておくと安心です',
+    '名前・住所・備考の言葉で、記録をさがせます',
+    '電話番号をタップすると、そのまま電話をかけられます'];
+  document.getElementById('optip').textContent='ひとこと：'+TIPS[Math.floor(Math.random()*TIPS.length)];
+  let started=false;
+  function close(){
+    op.classList.add('hide');
+    setTimeout(()=>op.remove(),600);
+  }
+  op.addEventListener('click',()=>{
+    if(started){close();return;}
+    started=true;
+    try{
+      initAudio();if(!audioCtx)throw 0;
+      const t=audioCtx.currentTime+.01;
+      opTone(1046,t,.05,.06);opTone(1318,t+.06,.05,.06);                          // ピコッ
+      for(let i=0;i<14;i++)opKey(.15+i*.095+Math.random()*.03);                    // カタカタ…
+      [1318.5,1568,2093].forEach((f,i)=>opTone(f,t+1.65+i*.06,i===2?.13:.05,.11)); // ピロリン
+    }catch(_){}
+    const go=document.getElementById('opgo');
+    go.textContent='準備中…';go.classList.add('busy');
+    op.querySelector('.op-gh').classList.add('spin');                               // GitHub のマークがくるっと回る
+    requestAnimationFrame(()=>{document.getElementById('opbar').style.width='100%';});
+    setTimeout(close,2300);
+  });
+})();
+// パソコンを打つキャラクター（オープニングの白いカードの中。近畿発の運賃表と同じ絵と動き）
+(function opTyping(){
+  const svgs=Array.from(document.querySelectorAll('svg.op-anim'));
+  if(!svgs.length)return;
+  // 各コマの絵：「色の記号 + x,y,幅,高さ をスペース区切り」を | でつないだもの
+  //   O=体のオレンジ  D=横を向いたときの影  G=ノートパソコン  K=目
+  //   SEQ は [コマ番号, 長さ（1/30秒単位）] の順番（最初の60＝2秒は正面で止まっている）
+  const FRAMES = ["O4,0,16,2 4,2,2,2 8,2,8,2 18,2,2,2 0,4,24,4 4,8,16,4 4,12,2,4 8,12,2,4 14,12,2,4 18,12,2,4|K6,2,2,2 16,2,2,2","O4,1,16,2 0,3,20,2 0,5,16,1 18,5,2,2 0,6,6,1 9,6,7,1 4,7,19,3 4,10,18,1 4,11,16,2 4,13,2,3 8,13,2,3 14,13,2,3 18,13,2,3|K16,5,2,2 6,6,3,1","O4,1,16,2 0,3,20,2 0,5,16,1 18,5,2,2 0,6,6,1 9,6,7,1 4,7,16,1 4,8,19,3 4,11,18,1 4,12,16,1 4,13,2,3 8,13,2,3 14,13,2,3 18,13,2,3|K16,5,2,2 6,6,3,1","O4,0,16,2 4,2,2,2 8,2,8,2 18,2,6,2 4,4,20,1 0,5,24,1 0,6,23,1 0,7,22,1 0,8,20,1 4,9,16,3 4,12,2,4 8,12,2,4 14,12,2,4 18,12,2,4|G21,-3,2,1 21,-2,4,1 23,-1,5,1 25,0,3,1 21,1,7,1|K6,2,2,2 16,2,2,2","O20,-1,4,1 4,0,20,2 4,2,2,2 8,2,8,2 18,2,6,1 18,3,2,1 4,4,16,1 0,5,20,4 4,9,16,3 4,12,2,4 8,12,2,4 14,12,2,4 18,12,2,4|G26,-7,1,5 21,-2,6,1|K6,2,2,2 16,2,2,2","O4,0,16,3 4,3,2,1 8,3,8,2 18,3,2,2 0,4,6,1 0,5,22,1 0,6,23,1 0,7,22,1 4,8,18,1 4,9,20,3 4,12,2,4 8,12,2,4 14,12,2,4 18,12,2,4|G30,3,2,1 29,4,4,1 28,5,5,1 28,6,4,1 22,7,9,1 22,8,7,1|K6,3,2,2 16,3,2,2","O4,0,16,3 4,3,2,2 8,3,8,2 18,3,2,2 0,5,20,4 4,9,20,3 4,12,2,4 8,12,2,4 14,12,2,4 18,12,6,1 18,13,2,3|G32,10,1,1 31,11,2,1 30,12,2,1 29,13,2,1 28,14,2,1 23,15,6,1|K6,3,2,2 16,3,2,2","O4,0,16,3 0,3,6,2 8,3,8,2 18,3,2,1 18,4,6,1 0,5,24,2 4,7,20,1 4,8,16,4 4,12,2,4 8,12,2,4 14,12,2,4 18,12,2,4|G32,12,2,1 30,13,2,1 28,14,2,1 23,15,6,1|K6,3,2,2 16,3,2,2","O8,-4,4,2 18,-4,4,2 7,-2,5,1 18,-2,5,1 7,-1,16,3 7,2,14,1 7,3,1,2 10,3,8,2 20,3,1,2 7,5,14,7 6,12,1,4 9,12,2,4 15,12,2,4 19,12,2,4|D5,-1,2,13 5,12,1,4|G32,9,1,1 31,10,2,1 30,11,2,1 29,12,2,1 28,13,2,1 23,14,6,1|K8,3,2,2 18,3,2,2","O10,1,12,3 23,3,2,1 10,4,2,3 14,4,6,3 23,4,3,2 24,6,2,1 10,7,12,3 25,7,1,1 10,10,16,2 10,12,2,2 16,12,2,2 20,12,6,2 9,14,3,1 15,14,3,1 19,14,7,1 9,15,2,1 15,15,2,1 19,15,2,1|D6,1,4,11 22,2,1,4 22,6,2,1 22,7,3,1 22,8,4,1 6,12,2,2 5,14,3,1 5,15,2,1|G32,10,1,1 31,11,2,1 30,12,2,1 29,13,2,1 28,14,2,1 23,15,6,1|K12,4,2,3 20,4,2,3","O10,2,12,3 10,5,2,2 14,5,6,2 10,7,12,1 10,8,15,4 10,12,12,1 10,13,2,1 16,13,2,1 20,13,2,1 9,14,3,1 15,14,3,1 19,14,3,1 9,15,2,1 15,15,2,1 19,15,2,1|D6,2,4,11 25,9,1,3 22,12,4,1 6,13,2,1 5,14,3,1 5,15,2,1|G32,9,1,1 31,10,2,1 30,11,2,1 29,12,2,1 28,13,2,1 23,14,6,1|K12,5,2,2 20,5,2,2","O10,2,12,3 10,5,2,2 14,5,6,2 10,7,15,4 10,11,12,2 10,13,2,1 16,13,2,1 20,13,2,1 9,14,3,1 15,14,3,1 19,14,3,1 9,15,2,1 15,15,2,1 19,15,2,1|D6,2,4,11 22,12,4,3 6,13,2,1 5,14,3,1 5,15,2,1|G32,10,1,1 31,11,2,1 30,12,2,1 29,13,2,1 28,14,2,1 23,15,6,1|K12,5,2,2 20,5,2,2","O10,2,12,3 10,5,2,2 14,5,6,2 10,7,12,2 10,9,15,4 10,13,2,1 16,13,2,1 20,13,5,1 9,14,3,1 15,14,3,1 19,14,3,1 9,15,2,1 15,15,2,1 19,15,2,1|D6,2,4,11 22,7,4,2 25,9,1,3 6,13,2,1 5,14,3,1 5,15,2,1|G32,10,1,1 31,11,2,1 30,12,2,1 29,13,2,1 28,14,2,1 23,15,6,1|K12,5,2,2 20,5,2,2","O10,2,12,3 10,5,2,2 14,5,6,2 10,7,15,4 10,11,12,2 10,13,2,1 16,13,2,1 20,13,2,1 9,14,3,1 15,14,3,1 19,14,3,1 9,15,2,1 15,15,2,1 19,15,2,1 22,15,4,1|D6,2,4,11 22,12,4,3 6,13,2,1 5,14,3,1 5,15,2,1|G32,10,1,1 31,11,2,1 30,12,2,1 29,13,2,1 28,14,2,1 26,15,3,1|K12,5,2,2 20,5,2,2","O10,2,12,3 10,5,2,2 14,5,6,2 10,7,12,2 10,9,15,3 10,12,16,1 10,13,2,1 16,13,2,1 20,13,6,1 9,14,3,1 15,14,3,1 19,14,7,1 9,15,2,1 15,15,2,1 19,15,2,1 22,15,4,1|D6,2,4,11 22,7,4,2 25,9,1,3 6,13,2,1 5,14,3,1 5,15,2,1|G32,10,1,1 31,11,2,1 30,12,2,1 29,13,2,1 28,14,2,1 26,15,3,1|K12,5,2,2 20,5,2,2","O9,1,12,3 22,3,2,1 9,4,2,3 13,4,6,3 22,4,3,2 23,6,2,1 9,7,12,2 24,7,1,1 9,9,14,1 9,10,16,2 10,12,2,2 16,12,2,2 19,12,7,1 20,13,6,1 9,14,3,1 15,14,3,1 19,14,7,1 9,15,2,1 15,15,2,1 19,15,2,1|D5,1,4,11 21,2,1,4 21,6,2,1 21,7,3,1 21,8,4,1 6,12,2,2 5,14,3,1 5,15,2,1|G31,6,1,1 30,7,2,1 29,8,2,1 28,9,2,1 27,10,2,1 25,11,3,1|K11,4,2,3 19,4,2,3","O6,0,14,3 6,3,2,1 10,3,8,2 2,5,5,4 8,5,14,1 8,6,15,1 8,7,16,1 8,8,18,2 6,10,15,1 6,11,14,1 8,12,2,4 14,12,2,4 18,12,2,4|D4,0,2,4 4,4,4,1 7,5,1,4 4,9,4,1 4,10,2,6|G22,5,2,1 23,6,2,1 24,7,3,1 26,8,2,2 21,10,7,1|K8,3,2,2 18,3,2,2","O4,1,16,2 0,3,20,2 0,5,6,2 8,5,8,2 18,5,2,2 4,7,16,1 4,8,19,3 4,11,18,1 4,12,16,1 4,13,2,3 8,13,2,3 14,13,2,3 18,13,2,3|K6,5,2,2 16,5,2,2","O4,1,16,2 0,3,20,2 0,5,6,2 8,5,8,2 18,5,2,2 4,7,16,1 4,8,18,4 4,12,16,1 4,13,2,3 8,13,2,3 14,13,2,3 18,13,2,3|K6,5,2,2 16,5,2,2","O4,0,16,2 4,2,2,2 8,2,8,2 18,2,2,2 4,4,16,1 0,5,24,4 4,9,16,3 4,12,2,4 8,12,2,4 14,12,2,4 18,12,2,4|K6,2,2,2 16,2,2,2"];
+  const SEQ = [[0,60],[1,3],[2,2],[1,3],[2,5],[3,2],[4,5],[5,3],[6,2],[7,2],[8,3],[9,3],[10,2],[11,3],[12,2],[10,3],[11,2],[12,3],[10,2],[11,3],[12,3],[10,2],[11,3],[12,2],[10,3],[11,2],[12,3],[10,2],[13,2],[14,3],[15,2],[16,3],[17,5],[18,3],[19,2],[0,29]];
+  const COLOR={O:'#d97757',D:'#b46348',G:'#8a8a8a',K:'#1a1612'};
+  const svgOf=FRAMES.map(f=>f.split('|').map(part=>{
+    const fill=COLOR[part[0]];
+    return part.slice(1).split(' ').map(r=>{
+      const [x,y,w,h]=r.split(',');
+      return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'"/>';
+    }).join('');
+  }).join(''));
+  const total=SEQ.reduce((s,q)=>s+q[1],0);
+  // data-skip="60" を付けた絵は、最初の止まっている2秒を飛ばしてすぐ打ちはじめる
+  const shown=new Map();
+  function frameAt(t){
+    t%=total;
+    for(const [f,len] of SEQ){if(t<len)return f;t-=len;}
+    return SEQ[0][0];
+  }
+  function draw(now){
+    const live=svgs.filter(s=>s.isConnected);
+    if(!live.length)return;   // オープニングが閉じたら止める
+    const base=Math.floor(now/(1000/30));
+    live.forEach(s=>{
+      const id=frameAt(base+(+s.dataset.skip||0));
+      if(shown.get(s)!==id){s.innerHTML=svgOf[id];shown.set(s,id);}
+    });
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
 
 // ── HELPERS ──
 // 入力された文字をそのまま表示する（< や & で画面が崩れないように）
