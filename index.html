@@ -86,17 +86,41 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px;
 }
 .topbar-title { font-size: 17px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; }
 .topbar-left { display: flex; align-items: center; min-width: 0; }
+/* スマホでは横に入りきらないので、ボタンは2段目の右に回る */
+.topbar-actions { margin-left: auto; }
 
 /* === Claude Code のキャラクター（ヘッダー左上） === */
 .cc-wrap { width: 62px; height: 40px; flex-shrink: 0; display: flex; justify-content: center; }
 .cc-mascot { display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; padding-top: 4px; }
 .cc-mascot svg { width: 51px; height: 34.5px; shape-rendering: crispEdges; overflow: visible; }  /* 右の約15pxはノートパソコンが出る場所。中の絵は ccTyping が描く */
-.cc-mascot .cc-label { font-family: -apple-system, "Segoe UI", sans-serif; font-size: 7px; letter-spacing: 0.05em; color: #d97757; opacity: 0.8; white-space: nowrap; }
-/* ときどきまばたき */
+.cc-mascot .cc-label { font-family: -apple-system, "Segoe UI", sans-serif; font-size: 7px; font-weight: 700; letter-spacing: 0.05em; color: #d97757; opacity: 0.8; white-space: nowrap; }
+
+/* === GitHub のマーク（ヘッダー左上、オレンジのキャラクターの右） ===
+   横には動かず、その場で：タコの足をゆらゆら・ときどき首をかしげる・ときどき目をパチッ。タップすると1回転 */
+.gh-mascot { --gh-disc: #24292f; --gh-cat: #f2f2f7; --gh-text: #57606a; }   /* 明るいヘッダーに合わせた色 */
+.gh-wrap { width: 50px; height: 46px; flex-shrink: 0; display: flex; justify-content: center; align-items: flex-end; margin-right: 6px; }
+.gh-mascot { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 46px; gap: 3px; text-decoration: none; }
+.gh-mascot svg { width: 24px; height: 24px; overflow: visible; }
+.gh-label { font-family: -apple-system, "Segoe UI", sans-serif; font-size: 7px; font-weight: 700; letter-spacing: 0.05em; color: var(--gh-text); opacity: 0.8; white-space: nowrap; }
+.gh-disc, .gh-dot { fill: var(--gh-disc); }
+.gh-cat { fill: var(--gh-cat); }
+.gh-tail-line { fill: none; stroke: var(--gh-cat); stroke-width: 0.8; stroke-linecap: round; }
+.gh-all { transform-box: view-box; transform-origin: 8px 8px; }
+.gh-head { transform-box: view-box; transform-origin: 8px 10.4px; animation: gh-tilt 5s ease-in-out infinite; }
+.gh-tail { transform-box: view-box; transform-origin: 6.5px 12.35px; animation: gh-wag 1.4s ease-in-out infinite alternate; }
+.gh-eyes { fill: var(--gh-disc); transform-box: fill-box; transform-origin: center; animation: gh-wink 6s 2s infinite; }
+.gh-mascot.spin .gh-all { animation: gh-spin 0.7s cubic-bezier(0.34,1.4,0.64,1); }
+/* 2つのロゴの並びをそろえる：下の文字（Claude Code / GitHub）を同じ高さにし、絵はその上に下ぞろえで置く */
+.cc-wrap { height: 46px; align-items: flex-end; }
+.cc-mascot { height: 46px; justify-content: flex-end; padding-top: 0; gap: 3px; }
+@keyframes gh-tilt { 0%,60%,100% { transform: rotate(0); } 68% { transform: rotate(-9deg); } 78% { transform: rotate(-9deg); } 86% { transform: rotate(6deg); } 92% { transform: rotate(0); } }
+@keyframes gh-wag { from { transform: rotate(-14deg); } to { transform: rotate(12deg); } }
+@keyframes gh-wink { 0%,88%,100% { transform: scaleY(0); } 90%,95% { transform: scaleY(1); } }
+@keyframes gh-spin { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(180deg) scale(1.15); } 100% { transform: rotate(360deg) scale(1); } }
 .topbar-actions { display: flex; gap: 6px; }
 .icon-btn {
   min-width: 54px;
@@ -160,6 +184,12 @@ body {
 .field select option { background: var(--surface); color: var(--text); }
 .field textarea { resize: vertical; }
 .field-error { font-size: 12px; color: var(--accent2); margin-top: 6px; font-weight: 600; }
+.zip-row { display: flex; gap: 8px; }
+.zip-row input { flex: 1; min-width: 0; }
+.zip-btn { flex-shrink: 0; padding: 0 14px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; font-family: var(--font); cursor: pointer; }
+.zip-btn:active { opacity: 0.8; }
+.zip-msg { font-size: 12px; color: var(--text-faint); margin-top: 6px; }
+.zip-msg.err { color: var(--accent2); font-weight: 600; }
 
 .row { display: flex; gap: 10px; }
 .row .field { flex: 1; }
@@ -301,60 +331,6 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
   text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;
 }
 
-/* ── MAP VIEW ── */
-#mapPane { padding: 0; }
-.map-head {
-  padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 6px;
-  align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-}
-.map-head span { font-size: 13px; color: var(--text-dim); }
-.map-head a { font-size: 12px; color: var(--accent); text-decoration: none; font-weight: 600; }
-.map-note { font-size: 11px; color: var(--text-faint); padding: 8px 16px 0; }
-.map-card-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
-.map-list-item {
-  display: flex; gap: 12px; align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px; padding: 12px;
-}
-.map-pin { font-size: 22px; }
-.map-item-info { flex: 1; min-width: 0; }
-.map-item-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; overflow-wrap: anywhere; }
-.map-item-addr { font-size: 12px; color: var(--text-dim); overflow-wrap: anywhere; }
-.map-item-visits { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-top: 3px; }
-.map-open-btn {
-  padding: 7px 12px; background: var(--accent);
-  border: none; border-radius: 8px; text-decoration: none; text-align: center;
-  color: white; font-size: 12px; font-weight: 700; cursor: pointer;
-}
-
-/* ── STATS PANE ── */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px;
-  text-align: center;
-}
-.stat-num {
-  font-size: 32px; font-weight: 700; font-family: var(--mono);
-  color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums;
-}
-.stat-label { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
-
-.ranking-list { display: flex; flex-direction: column; gap: 6px; }
-.rank-item {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px 12px;
-}
-.rank-num { font-family: var(--mono); font-size: 13px; color: var(--text-faint); width: 20px; }
-.rank-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
-.rank-bar-wrap { width: 80px; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
-.rank-bar { height: 100%; background: var(--accent); border-radius: 3px; }
-.rank-count { font-family: var(--mono); font-size: 12px; color: var(--accent); width: 32px; text-align: right; }
-
 /* ── MODALS ── */
 .modal-overlay {
   display: none; position: fixed; inset: 0;
@@ -466,6 +442,29 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 <div id="ccIntro">
   <div class="ccx-box" data-who="cc">
     <div class="ccx-pic ccx-pic-cc"><svg class="cc-anim" viewBox="0 -7 34 23" aria-hidden="true"></svg></div>
+    <div class="ccx-pic ccx-pic-gh"><span class="gh-mascot">
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <defs><clipPath id="ghClipIntro"><circle cx="8" cy="8" r="8"/></clipPath></defs>
+          <g class="gh-all">
+            <circle class="gh-disc" cx="8" cy="8" r="8"/>
+            <g clip-path="url(#ghClipIntro)">
+              <path class="gh-cat" d="M6.75 10.3 C6.45 10.7 6.3 11.2 6.3 11.8 L6.3 15.1 Q6.3 15.6 6.8 15.6 L9.2 15.6 Q9.7 15.6 9.7 15.1 L9.7 11.8 C9.7 11.2 9.55 10.7 9.25 10.3 Z"/>
+              <g class="gh-head">
+                <path class="gh-cat" d="M4.15 4.75 C3.85 3.85 3.95 2.85 4.3 2.1 C4.3 2.1 5.05 1.95 6.35 2.9 C6.9 2.75 7.45 2.68 8 2.68 C8.55 2.68 9.1 2.75 9.65 2.9 C10.95 1.95 11.7 2.1 11.7 2.1 C12.05 2.85 12.15 3.85 11.85 4.75 C12.4 5.3 12.75 6.0 12.75 6.95 C12.75 9.75 10.95 10.45 8 10.55 C5.05 10.45 3.25 9.75 3.25 6.95 C3.25 6.0 3.6 5.3 4.15 4.75 Z"/>
+                <rect class="gh-eyes" x="5.5" y="6.1" width="1" height="1.5" rx="0.5"/>
+                <rect class="gh-eyes" x="9.5" y="6.1" width="1" height="1.5" rx="0.5"/>
+              </g>
+              <g class="gh-tail">
+                <path class="gh-tail-line" d="M6.5 12.35 C5.3 12.55 4.65 12.0 4.25 11.25 C3.95 10.7 3.6 10.35 3.0 10.25"/>
+                <circle class="gh-dot" cx="5.5" cy="12.2" r="0.17"/>
+                <circle class="gh-dot" cx="4.75" cy="11.75" r="0.17"/>
+                <circle class="gh-dot" cx="4.25" cy="11.05" r="0.17"/>
+                <circle class="gh-dot" cx="3.7" cy="10.5" r="0.17"/>
+              </g>
+            </g>
+          </g>
+        </svg>
+    </span></div>
     <div class="ccx-name"></div>
     <div class="ccx-msg"></div>
     <div class="ccx-actions">
@@ -496,6 +495,33 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
         <span class="cc-label">Claude Code</span>
       </a>
     </div>
+    <div class="gh-wrap">
+      <a class="gh-mascot" href="https://github.com/aaiuioo-maker/jisen-HOMON1.0" target="_blank" rel="noopener" title="GitHub で公開" aria-label="GitHub で公開">
+        <!-- GitHub のマーク（丸の中のネコ＋左に巻いたタコの足）。部品ごとに分けて、それぞれ動かしている -->
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <defs><clipPath id="ghClip"><circle cx="8" cy="8" r="8"/></clipPath></defs>
+          <g class="gh-all">
+            <circle class="gh-disc" cx="8" cy="8" r="8"/>
+            <g clip-path="url(#ghClip)">
+              <path class="gh-cat" d="M6.75 10.3 C6.45 10.7 6.3 11.2 6.3 11.8 L6.3 15.1 Q6.3 15.6 6.8 15.6 L9.2 15.6 Q9.7 15.6 9.7 15.1 L9.7 11.8 C9.7 11.2 9.55 10.7 9.25 10.3 Z"/>
+              <g class="gh-head">
+                <path class="gh-cat" d="M4.15 4.75 C3.85 3.85 3.95 2.85 4.3 2.1 C4.3 2.1 5.05 1.95 6.35 2.9 C6.9 2.75 7.45 2.68 8 2.68 C8.55 2.68 9.1 2.75 9.65 2.9 C10.95 1.95 11.7 2.1 11.7 2.1 C12.05 2.85 12.15 3.85 11.850 4.75 C12.4 5.3 12.75 6.0 12.75 6.95 C12.75 9.75 10.95 10.45 8 10.55 C5.05 10.45 3.25 9.75 3.25 6.95 C3.25 6.0 3.6 5.3 4.15 4.75 Z"/>
+                <rect class="gh-eyes" x="5.5" y="6.1" width="1" height="1.5" rx="0.5"/>
+                <rect class="gh-eyes" x="9.5" y="6.1" width="1" height="1.5" rx="0.5"/>
+              </g>
+              <g class="gh-tail">
+                <path class="gh-tail-line" d="M6.5 12.35 C5.3 12.55 4.65 12.0 4.25 11.25 C3.95 10.7 3.6 10.35 3.0 10.25"/>
+                <circle class="gh-dot" cx="5.5" cy="12.2" r="0.17"/>
+                <circle class="gh-dot" cx="4.75" cy="11.75" r="0.17"/>
+                <circle class="gh-dot" cx="4.25" cy="11.05" r="0.17"/>
+                <circle class="gh-dot" cx="3.7" cy="10.5" r="0.17"/>
+              </g>
+            </g>
+          </g>
+        </svg>
+        <span class="gh-label">GitHub</span>
+      </a>
+    </div>
     <div class="topbar-title">実践訪問先</div>
   </div>
   <div class="topbar-actions">
@@ -514,8 +540,6 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 <!-- TABS -->
 <div class="tabs">
   <button class="tab active" data-tab="list" onclick="switchTab('list')">📋 記録一覧</button>
-  <button class="tab" data-tab="map" onclick="switchTab('map')">🗺 地図</button>
-  <button class="tab" data-tab="stats" onclick="switchTab('stats')">📊 統計</button>
   <button class="tab" data-tab="form" onclick="switchTab('form')">＋ 登録</button>
 </div>
 
@@ -526,19 +550,6 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
     <input type="text" id="searchInput" placeholder="名前・住所・備考で検索…" oninput="loadRecords()">
   </div>
   <div class="cards-list" id="recordsList"></div>
-</div>
-
-<!-- MAP PANE -->
-<div class="pane" id="mapPane">
-  <div id="mapHead"></div>
-  <div class="map-card-list" id="mapCardList"></div>
-</div>
-
-<!-- STATS PANE -->
-<div class="pane" id="statsPane">
-  <div class="stats-grid" id="statsGrid"></div>
-  <p class="section-label">訪問回数ランキング</p>
-  <div class="ranking-list" id="rankingList"></div>
 </div>
 
 <!-- FORM PANE -->
@@ -584,6 +595,14 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
   <div class="field">
     <label for="phone">電話番号</label>
     <input type="tel" id="phone" placeholder="090-1234-5678">
+  </div>
+  <div class="field">
+    <label for="zip">郵便番号（7けたを入れると住所が出ます）</label>
+    <div class="zip-row">
+      <input type="text" id="zip" inputmode="numeric" autocomplete="postal-code" placeholder="612-8000" maxlength="8" oninput="onZipInput()">
+      <button type="button" class="zip-btn" onclick="lookupZip(true)">住所を出す</button>
+    </div>
+    <p class="zip-msg" id="zipMsg" hidden></p>
   </div>
   <div class="field">
     <label for="address">住所 *</label>
@@ -798,8 +817,6 @@ function switchTab(tab) {
   document.getElementById(tab + 'Pane').classList.add('active');
   if (tab !== 'list') clearSelection();
   if (tab === 'list') loadRecords();
-  if (tab === 'map') loadMapView();
-  if (tab === 'stats') loadStats();
 }
 
 // ── DATA ──
@@ -874,7 +891,7 @@ function loadRecords() {
       <div class="card-body">
         <div class="card-row"><span class="card-row-label">電話</span><span class="card-row-val">${phone}</span></div>
         <div class="card-row"><span class="card-row-label">属性</span><span class="card-row-val">${esc(record.age || '?')}歳 / ${esc(record.gender)} / ${esc(record.nationality || '?')} / ${esc(record.occupation || '?')}</span></div>
-        <div class="card-row"><span class="card-row-label">住所</span><span class="card-row-val">${esc(record.address)}</span></div>
+        <div class="card-row"><span class="card-row-label">住所</span><span class="card-row-val">${record.zip ? "〒" + esc(fmtZip(record.zip)) + " " : ""}${esc(record.address)}</span></div>
         ${record.remarks ? `<div class="card-row"><span class="card-row-label">備考</span><span class="card-row-val" style="color:var(--text-faint);">${esc(record.remarks)}</span></div>` : ''}
         <div class="dates-section">
           <div class="dates-title">訪問履歴</div>
@@ -919,73 +936,44 @@ document.getElementById('recordsList').addEventListener('change', e => {
   }
 });
 
-// ── MAP VIEW ──
-function loadMapView() {
-  const records = getRecords();
-  const head = document.getElementById('mapHead');
-  const el = document.getElementById('mapCardList');
-
-  if (records.length === 0) {
-    head.innerHTML = '';
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🗺</div><div class="empty-text">訪問先を登録すると地図で確認できます</div></div>`;
-    return;
-  }
-
-  const addrs = records.slice().reverse().map(r => r.address);
-  const over = addrs.length > 11;
-  head.innerHTML = `
-    <div class="map-head">
-      <span>全${records.length}件の訪問先</span>
-      <a href="${esc(googleWebRouteUrl(addrs.slice(0, 11)))}" target="_blank" rel="noopener" onclick="click()">Googleマップで${over ? '先頭11件を' : '全件を'}経路表示 →</a>
-    </div>
-    ${over ? '<p class="map-note">Googleマップの経路は最大11地点までです。</p>' : ''}`;
-
-  el.innerHTML = records.slice().reverse().map(record => `
-    <div class="map-list-item">
-      <div class="map-pin">📍</div>
-      <div class="map-item-info">
-        <div class="map-item-name">${esc(record.name)}</div>
-        <div class="map-item-addr">${esc(record.address)}</div>
-        <div class="map-item-visits">${record.dates.length}回訪問 / 最終: ${esc(record.dates[record.dates.length - 1] || 'なし')}</div>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:5px; flex-shrink:0;">
-        <a class="map-open-btn btn-apple" href="${esc(appleMapUrl(record.address))}" onclick="click()" aria-label="純正マップで開く">🍎</a>
-        <a class="map-open-btn" href="${esc(googleMapUrl(record.address))}" onclick="click()" aria-label="Googleマップで開く">🗺</a>
-      </div>
-    </div>`).join('');
+// ── 郵便番号から住所 ──
+// 全角の数字やハイフンも受け付ける
+function toHalfDigits(s) { return String(s || '').replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)); }
+function fmtZip(z) { z = String(z || ''); return z.length === 7 ? z.slice(0, 3) + '-' + z.slice(3) : z; }
+function zipMsg(text, isErr) {
+  const m = document.getElementById('zipMsg');
+  m.textContent = text; m.classList.toggle('err', !!isErr); m.hidden = !text;
 }
-
-// ── STATS ──
-function loadStats() {
-  const records = getRecords();
-  const total = records.length;
-  const totalVisits = records.reduce((s, r) => s + r.dates.length, 0);
-  const maxVisits = total > 0 ? Math.max(...records.map(r => r.dates.length)) : 0;
-  const avgVisits = total > 0 ? (totalVisits / total).toFixed(1) : 0;
-
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">登録件数</div></div>
-    <div class="stat-card"><div class="stat-num">${totalVisits}</div><div class="stat-label">総訪問回数</div></div>
-    <div class="stat-card"><div class="stat-num">${avgVisits}</div><div class="stat-label">平均訪問回数</div></div>
-    <div class="stat-card"><div class="stat-num">${maxVisits}</div><div class="stat-label">最多訪問回数</div></div>
-  `;
-
-  const sorted = [...records].sort((a, b) => b.dates.length - a.dates.length).slice(0, 10);
-  const rankEl = document.getElementById('rankingList');
-  if (sorted.length === 0) {
-    rankEl.innerHTML = '<p style="color:var(--text-faint); font-size:13px; padding:10px 0;">データなし</p>';
-    return;
+let lastZip = '';
+function onZipInput() {
+  const z = toHalfDigits(document.getElementById('zip').value).replace(/\D/g, '');
+  if (z.length === 7 && z !== lastZip) lookupZip(false);
+  if (z.length < 7) { lastZip = ''; zipMsg(''); }
+}
+// 郵便番号検索API（zipcloud・日本郵便のデータ）で住所を調べて、住所欄に入れる
+async function lookupZip(fromButton) {
+  const z = toHalfDigits(document.getElementById('zip').value).replace(/\D/g, '');
+  if (z.length !== 7) { zipMsg('郵便番号は7けたで入れてください。', true); return; }
+  lastZip = z;
+  document.getElementById('zip').value = fmtZip(z);
+  zipMsg('住所を調べています…');
+  try {
+    const res = await fetch('https://zipcloud.ibsnet.co.jp/api/search?zipcode=' + z);
+    const data = await res.json();
+    if (!data.results || !data.results.length) { zipMsg('この郵便番号の住所が見つかりませんでした。', true); sad(); return; }
+    const r = data.results[0];
+    const town = r.address1 + r.address2 + r.address3;
+    const addr = document.getElementById('address');
+    const cur = addr.value.trim();
+    // すでに同じ町名から始まっていれば番地は残す。そうでなければ町名までを入れて、番地を続けて打てるようにする
+    if (!cur.startsWith(town) || fromButton) addr.value = cur.startsWith(town) ? cur : town;
+    zipMsg(data.results.length > 1 ? `候補が${data.results.length}件あります。住所欄を確かめて、番地を続けて入れてください。` : '住所を入れました。番地を続けて入れてください。');
+    click();
+    addr.focus();
+    const end = addr.value.length; try { addr.setSelectionRange(end, end); } catch (e) {}
+  } catch (e) {
+    zipMsg('住所を調べられませんでした。電波のよいところでもう一度押してください。', true);
   }
-  rankEl.innerHTML = sorted.map((r, i) => {
-    const pct = maxVisits > 0 ? (r.dates.length / maxVisits * 100) : 0;
-    return `
-      <div class="rank-item">
-        <span class="rank-num">${i + 1}</span>
-        <span class="rank-name">${esc(r.name)}</span>
-        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%"></div></div>
-        <span class="rank-count">${r.dates.length}回</span>
-      </div>`;
-  }).join('');
 }
 
 // ── SAVE / EDIT ──
@@ -999,6 +987,7 @@ function saveRecord() {
   const occupation = document.getElementById('occupation').value.trim();
   const phone = document.getElementById('phone').value.trim();
   const address = document.getElementById('address').value.trim();
+  const zip = toHalfDigits(document.getElementById('zip').value).replace(/\D/g, '');
   const remarks = document.getElementById('remarks').value.trim();
 
   const err = document.getElementById('formError');
@@ -1008,9 +997,9 @@ function saveRecord() {
   const records = getRecords();
   if (editId) {
     const idx = records.findIndex(r => r.id === editId);
-    if (idx !== -1) Object.assign(records[idx], { name, age, gender, nationality, occupation, phone, address, remarks });
+    if (idx !== -1) Object.assign(records[idx], { name, age, gender, nationality, occupation, phone, zip, address, remarks });
   } else {
-    records.push({ id: newId(), dates: [date], name, age, gender, nationality, occupation, phone, address, remarks });
+    records.push({ id: newId(), dates: [date], name, age, gender, nationality, occupation, phone, zip, address, remarks });
   }
   if (!writeStore(records)) return;
   toast(editId ? '更新しました' : '登録しました');
@@ -1029,6 +1018,7 @@ function editRecord(id) {
   document.getElementById('nationality').value = r.nationality || '';
   document.getElementById('occupation').value = r.occupation || '';
   document.getElementById('phone').value = r.phone || '';
+  document.getElementById("zip").value = r.zip ? fmtZip(r.zip) : "";
   document.getElementById('address').value = r.address;
   document.getElementById('remarks').value = r.remarks || '';
   document.getElementById('dateInputGroup').hidden = true;
@@ -1039,7 +1029,7 @@ function editRecord(id) {
 }
 
 function resetForm() {
-  ['editId', 'name', 'age', 'nationality', 'occupation', 'phone', 'address', 'remarks'].forEach(f => document.getElementById(f).value = '');
+  ['editId', 'name', 'age', 'nationality', 'occupation', 'phone', 'zip', 'address', 'remarks'].forEach(f => document.getElementById(f).value = '');
   document.getElementById('gender').value = '未確認';
   document.getElementById('visitDate').value = todayStr();
   document.getElementById('dateInputGroup').hidden = false;
@@ -1047,6 +1037,7 @@ function resetForm() {
   document.getElementById('submitBtn').classList.remove('edit-mode');
   document.getElementById('cancelBtn').hidden = true;
   document.getElementById('formError').hidden = true;
+  zipMsg(''); lastZip = '';
 }
 
 function cancelEdit() { click(); resetForm(); switchTab('list'); }
@@ -1201,7 +1192,7 @@ function buildPrintHTML(records) {
         <div style="font-size:9px;color:#0070e0;margin-bottom:3px;">☎ ${esc(r.phone || '未登録')}</div>
         <div style="font-size:9px;color:#444;margin-bottom:2px;">${esc(r.age || '?')}歳・${esc(r.gender)}</div>
         <div style="font-size:9px;color:#444;margin-bottom:2px;">${esc(r.nationality || '?')}・${esc(r.occupation || '?')}</div>
-        <div style="font-size:9px;color:#333;margin-bottom:5px;word-break:break-all;line-height:1.5;">${esc(r.address)}</div>
+        <div style="font-size:9px;color:#333;margin-bottom:5px;word-break:break-all;line-height:1.5;">${r.zip ? "〒" + esc(fmtZip(r.zip)) + " " : ""}${esc(r.address)}</div>
         ${r.remarks ? `<div style="font-size:9px;color:#888;margin-bottom:5px;border-left:2px solid #ddd;padding-left:4px;word-break:break-all;">${esc(r.remarks)}</div>` : ''}
         <div style="background:#f5f5f5;border-radius:4px;padding:4px;">
           <div style="font-size:9px;font-weight:bold;color:#333;margin-bottom:2px;">訪問履歴 ${r.dates.length}回</div>
@@ -1272,6 +1263,18 @@ document.querySelectorAll('.modal-overlay').forEach(ov => {
   if (ov.id === 'confirmModal') return;
   ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
 });
+
+// GitHub のマーク：タップするとくるっと1回転（そのあと自己紹介が出る）
+(function ghMascot() {
+  const gh = document.querySelector('.topbar .gh-mascot');
+  if (!gh) return;
+  gh.addEventListener('pointerdown', function() {
+    gh.classList.remove('spin'); void gh.offsetWidth; gh.classList.add('spin');
+  });
+  gh.addEventListener('animationend', function(e) {
+    if (e.animationName === 'gh-spin') gh.classList.remove('spin');
+  });
+})();
 
 // ── INIT ──
 document.getElementById('visitDate').value = todayStr();
@@ -2183,7 +2186,7 @@ window.CC_EXTRA = [...MOVES, ...SLEEPS, ...FOODS, ...FOODS2, ...FOODS3, ...WAYS,
     },
     gh: {
       name: 'GitHub（ギットハブ）',
-      link: '',
+      link: 'https://github.com/aaiuioo-maker/jisen-HOMON1.0',
       text: 'ぼくは GitHub の オクトキャット。\nプログラムを しまっておく\n大きな本だな だよ。\n' + APP + 'は ここに置いてあって\nスマホからも 開けるんだ。'
     }
   };
