@@ -307,7 +307,9 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 }
 .btn-delete-card:active { background: rgba(255,59,48,0.25); }
 
-/* ── MULTI-MAP BAR ── */
+/* ── 選んだ記録を画像保存するバー ── */
+.multi-bar .btn-imgsave { background: var(--yellow); color: #fff; }
+.multi-bar .btn-unselect { background: var(--surface3); color: var(--text); flex: 0 0 auto; padding: 10px 12px; }
 .multi-bar {
   display: none;
   position: fixed; left: 16px; right: 16px;
@@ -650,12 +652,11 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
   </form>
 </div>
 
-<!-- MULTI-MAP BAR -->
+<!-- 選んだ記録だけを画像にするバー（名前の横にチェックを入れると出る） -->
 <div class="multi-bar" id="multiBar">
   <span class="multi-bar-label" id="multiBarLabel">0件選択中</span>
-  <a class="multi-bar-btn btn-apple" id="multiApple" onclick="afterMultiOpen()">🍎 純正</a>
-  <a class="multi-bar-btn btn-google" id="multiGoogle" onclick="afterMultiOpen()">Google</a>
-  <button class="multi-bar-btn btn-yahoo" id="multiYahoo" onclick="multiYahoo()">Y! Yahoo</button>
+  <button class="multi-bar-btn btn-imgsave" onclick="openTableModal()">🖼️ 画像保存</button>
+  <button class="multi-bar-btn btn-unselect" onclick="click(); clearSelection();">選択をやめる</button>
 </div>
 
 <!-- ADD DATE MODAL -->
@@ -715,7 +716,7 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 <!-- TABLE MODAL -->
 <div class="modal-overlay center" id="tableModal">
   <div class="modal-sheet">
-    <p class="modal-title">訪問記録一覧表</p>
+    <p class="modal-title" id="tableModalTitle">訪問記録一覧表</p>
     <div id="captureArea" style="overflow:auto; max-height:52vh; background:white; padding:4px; border-radius:8px;"></div>
     <button class="submit-btn" id="saveImgBtn" style="background:var(--yellow); margin-top:12px;" onclick="saveAsImage()">📸 画像に変換して保存</button>
     <button class="cancel-btn" onclick="closeModal('tableModal')">閉じる</button>
@@ -780,7 +781,7 @@ function opKey(d){
   const TIPS=[
     '登録のとき、郵便番号を7けた入れると住所が出ます',
     '2回目からの訪問は、カードの「＋ 訪問日」で足せます',
-    'カードにチェックを入れると、選んだ訪問先を地図アプリの経路で回れます',
+    '名前の横にチェックを入れると、選んだ記録だけを画像にできます',
     '「画像保存」で、記録の一覧を1枚の画像にできます',
     '「データ保存」でバックアップを取っておくと安心です',
     '名前・住所・備考の言葉で、記録をさがせます',
@@ -891,24 +892,6 @@ function askConfirm(title, text, okLabel = '削除する') {
 // 地図アプリを直接開くリンク
 const appleMapUrl = addr => `maps://?q=${encodeURIComponent(addr)}`;
 const googleMapUrl = addr => `comgooglemaps://?q=${encodeURIComponent(addr)}`;
-// 複数地点：Google は途中の訪問先もすべて入れた経路（+to: でつなぐ）
-function googleRouteUrl(addrs) {
-  if (addrs.length === 1) return googleMapUrl(addrs[0]);
-  const dest = addrs.slice(1).map(encodeURIComponent).join('+to:');
-  return `comgooglemaps://?saddr=${encodeURIComponent(addrs[0])}&daddr=${dest}`;
-}
-function appleRouteUrl(addrs) {
-  if (addrs.length === 1) return appleMapUrl(addrs[0]);
-  return `maps://?saddr=${encodeURIComponent(addrs[0])}&daddr=${encodeURIComponent(addrs[1])}`;
-}
-// 地図タブの全件表示（Web版Googleマップ、最大11地点）
-function googleWebRouteUrl(addrs) {
-  if (addrs.length === 1) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addrs[0])}`;
-  const way = addrs.slice(1, -1);
-  let url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(addrs[0])}&destination=${encodeURIComponent(addrs[addrs.length - 1])}&travelmode=driving`;
-  if (way.length) url += `&waypoints=${encodeURIComponent(way.join('|'))}`;
-  return url;
-}
 // Yahoo!マップ：国土地理院で緯度経度を調べてピンを立てる（失敗したら住所で検索）
 function openYahooMap(address, name) {
   click();
@@ -1207,7 +1190,7 @@ function confirmAddDate() {
   }
 }
 
-// ── MULTI MAP ──
+// ── 画像保存のための選択（名前の横のチェック） ──
 function selectedRecords() {
   const records = getRecords();
   return Array.from(document.querySelectorAll('.select-record:checked'))
@@ -1219,23 +1202,6 @@ function toggleMultiBar() {
   if (sel.length === 0) { bar.classList.remove('visible'); return; }
   bar.classList.add('visible');
   document.getElementById('multiBarLabel').textContent = `${sel.length}件選択中`;
-  const addrs = sel.map(r => r.address);
-  const apple = document.getElementById('multiApple');
-  const yahoo = document.getElementById('multiYahoo');
-  document.getElementById('multiGoogle').href = googleRouteUrl(addrs);
-  // 純正マップは2地点まで、Yahoo は1地点のみ対応
-  apple.hidden = addrs.length > 2;
-  apple.href = appleRouteUrl(addrs);
-  yahoo.hidden = addrs.length > 1;
-}
-function multiYahoo() {
-  const sel = selectedRecords();
-  if (sel.length === 1) openYahooMap(sel[0].address, sel[0].name);
-  setTimeout(clearSelection, 300);
-}
-function afterMultiOpen() {
-  click();
-  setTimeout(clearSelection, 300);
 }
 function clearSelection() {
   document.querySelectorAll('.select-record:checked').forEach(cb => {
@@ -1331,10 +1297,15 @@ function buildPrintHTML(records) {
   </div>`;
 }
 
+// 画像にする記録（チェックを入れたものがあればそれだけ、なければ全部）
+let printRecords = [];
 function openTableModal() {
   click();
-  const records = getRecords();
+  const sel = selectedRecords();
+  const records = sel.length ? sel : getRecords();
   if (records.length === 0) { toast('まだ記録がありません'); return; }
+  printRecords = records;
+  document.getElementById('tableModalTitle').textContent = sel.length ? `チェックした${sel.length}件の一覧表` : '訪問記録一覧表（全件）';
   document.getElementById('captureArea').innerHTML = buildPrintHTML(records);
   document.getElementById('saveImgBtn').hidden = false;
   openModal('tableModal');
@@ -1349,7 +1320,7 @@ function saveAsImage() {
   // 画面外に描画してからキャプチャ（白紙対策）
   const offscreen = document.createElement('div');
   offscreen.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;';
-  offscreen.innerHTML = buildPrintHTML(getRecords());
+  offscreen.innerHTML = buildPrintHTML(printRecords);
   document.body.appendChild(offscreen);
   const target = offscreen.querySelector('#printRoot');
 
