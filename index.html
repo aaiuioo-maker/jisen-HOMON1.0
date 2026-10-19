@@ -794,7 +794,7 @@ function opKey(d){
     '登録のとき、郵便番号を7けた入れると住所が出ます',
     '2回目からの訪問は、カードの「＋ 訪問日」で足せます',
     '名前の横にチェックを入れると、選んだ記録だけを画像にできます',
-    '「画像保存」で、記録の一覧を1枚の画像にできます',
+    '名前の横にチェックを入れると「画像保存」が出ます',
     '「データ保存」でバックアップを取っておくと安心です',
     '「すべてにチェック」で、全員の記録を1枚の画像にできます',
     '電話番号をタップすると、そのまま電話をかけられます'];
@@ -1389,7 +1389,7 @@ function fitTitle() {
   const right = document.querySelector('.topbar-actions').getBoundingClientRect().left - 6;
   t.style.fontSize = '16px';
   const per = t.scrollWidth / 16;              // 1pxあたりの文字の幅
-  const size = Math.max(16, Math.min(30, Math.floor((right - left) / per)));
+  const size = Math.max(16, Math.min(44, Math.floor((right - left) / per)));
   t.style.fontSize = size + 'px';
 }
 window.addEventListener('resize', fitTitle);
