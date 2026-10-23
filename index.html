@@ -238,7 +238,12 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 }
 
 /* ── すべてにチェック ── */
-.check-all-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.check-all-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.map-all-btn {
+  padding: 6px 12px; border-radius: 8px; border: none;
+  background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; font-family: var(--font); cursor: pointer;
+}
+.map-all-btn:active { opacity: .7; }
 .check-all-btn {
   padding: 4px 9px; border-radius: 8px; border: 1px solid var(--border);
   background: var(--surface); color: var(--accent); font-size: 10px; font-weight: 700; font-family: var(--font); cursor: pointer;
@@ -342,6 +347,26 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
   font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font);
   text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;
 }
+
+/* ── 地図で見る（訪問先の位置関係をアプリの中の地図で表示） ── */
+.multi-bar .btn-map { background: var(--accent); color: #fff; }
+#mapView { position: fixed; inset: 0; z-index: 350; background: var(--bg); display: none; flex-direction: column; font-family: var(--font); }
+#mapView.show { display: flex; }
+.mv-hdr { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top) + 8px) 12px 8px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.mv-ttl { flex: 1; min-width: 0; }
+.mv-title { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.mv-sub { font-size: 11px; color: var(--text-faint); margin-top: 1px; }
+.mv-close { border: none; background: var(--surface3); color: var(--text); border-radius: 10px; padding: 9px 16px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; flex-shrink: 0; }
+#mvMap { flex: 1; min-height: 0; background: #e8e8e8; position: relative; }
+.mv-tabs { position: absolute; top: 10px; right: 10px; z-index: 1000; display: flex; background: #fff; border-radius: 10px; padding: 3px; gap: 2px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+.mv-tab { border: none; background: transparent; border-radius: 8px; padding: 7px 9px; font-size: 12px; font-weight: 700; color: #444; font-family: inherit; cursor: pointer; white-space: nowrap; }
+.mv-tab.on { background: var(--accent); color: #fff; }
+.mv-pin { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+.mv-pop { font-family: var(--font); min-width: 180px; }
+.mv-pop b { font-size: 14px; }
+.mv-pop .addr { font-size: 12px; color: #666; margin: 2px 0 8px; }
+.mv-pop-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.mv-pop-btns button { border: none; border-radius: 8px; padding: 8px 4px; font-size: 12px; font-weight: 700; color: #fff; font-family: inherit; cursor: pointer; }
 
 /* ── MODALS ── */
 .modal-overlay {
@@ -587,6 +612,7 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 <!-- LIST PANE -->
 <div class="pane active" id="listPane">
   <div class="check-all-row">
+    <button type="button" class="map-all-btn" id="mapAllBtn" onclick="openVisitMap(false)" hidden>🗺️ 地図で見る</button>
     <button type="button" class="check-all-btn" id="checkAllBtn" onclick="toggleCheckAll()" hidden>☑ すべてにチェック</button>
   </div>
   <div class="cards-list" id="recordsList"></div>
@@ -662,8 +688,29 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 </div>
 
 <!-- 選んだ記録だけを画像にするバー（名前の横にチェックを入れると出る） -->
+<!-- 訪問先をまとめて表示する地図 -->
+<div id="mapView">
+  <div class="mv-hdr">
+    <div class="mv-ttl">
+      <div class="mv-title" id="mvTitle"></div>
+      <div class="mv-sub" id="mvSub"></div>
+    </div>
+    <button class="mv-close" onclick="closeVisitMap()">閉じる</button>
+  </div>
+  <div id="mvMap">
+    <!-- 地図の種類の切り替え（右上） -->
+    <div class="mv-tabs">
+      <button class="mv-tab" data-k="std" onclick="setBase('std')">標準</button>
+      <button class="mv-tab" data-k="osm" onclick="setBase('osm')">OSM</button>
+      <button class="mv-tab" data-k="photo" onclick="setBase('photo')">航空写真</button>
+      <button class="mv-tab" data-k="pale" onclick="setBase('pale')">淡色</button>
+    </div>
+  </div>
+</div>
+
 <div class="multi-bar" id="multiBar">
   <span class="multi-bar-label" id="multiBarLabel">0件選択中</span>
+  <button class="multi-bar-btn btn-map" onclick="openVisitMap(true)">🗺️ 地図</button>
   <button class="multi-bar-btn btn-imgsave" onclick="openTableModal()">🖼️ 画像保存</button>
   <button class="multi-bar-btn btn-unselect" onclick="click(); clearSelection();">選択をやめる</button>
 </div>
@@ -1201,6 +1248,7 @@ function toggleMultiBar() {
   const boxes = document.querySelectorAll('.select-record');
   const allBtn = document.getElementById('checkAllBtn');
   allBtn.hidden = boxes.length === 0;
+  document.getElementById('mapAllBtn').hidden = boxes.length === 0;
   const allOn = boxes.length > 0 && sel.length === boxes.length;
   allBtn.textContent = allOn ? '☐ チェックをすべて外す' : '☑ すべてにチェック';
   if (sel.length === 0) { bar.classList.remove('visible'); return; }
@@ -1221,6 +1269,136 @@ function clearSelection() {
     cb.closest('.record-card')?.classList.remove('selected');
   });
   toggleMultiBar();
+}
+
+// ── 地図で見る：アプリの中に地図を出して、訪問先に番号付きのピンを立てる（よく行く場所と同じしくみ） ──
+let leafletP = null, mvMap = null, mvLayer = null, mvList = [], mvToken = 0;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve();
+  if (leafletP) return leafletP;
+  leafletP = new Promise((res, rej) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+    document.head.appendChild(css);
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    s.onload = res; s.onerror = () => { leafletP = null; rej(); };
+    document.head.appendChild(s);
+  });
+  return leafletP;
+}
+// 地図の種類（右上のボタンで切り替え。最後に選んだものを覚えておく）
+const GSI_ATTR = '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>';
+const MV_BASES = {
+  std:   { url: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', maxZoom: 18, attr: GSI_ATTR },
+  pale:  { url: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', maxZoom: 18, attr: GSI_ATTR },
+  photo: { url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg', maxZoom: 18, attr: GSI_ATTR },
+  osm:   { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', maxZoom: 19, attr: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>' }
+};
+let mvBaseKey = 'std', mvBaseLayer = null;
+try { const k = localStorage.getItem('map_base'); if (MV_BASES[k]) mvBaseKey = k; } catch (e) {}
+function setBase(k) {
+  if (!MV_BASES[k]) return;
+  if (mvMap) click();
+  mvBaseKey = k;
+  try { localStorage.setItem('map_base', k); } catch (e) {}
+  document.querySelectorAll('.mv-tab').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  if (!mvMap) return;
+  if (mvBaseLayer) mvBaseLayer.remove();
+  const b = MV_BASES[k];
+  mvBaseLayer = L.tileLayer(b.url, { maxZoom: b.maxZoom, attribution: b.attr }).addTo(mvMap);
+  mvBaseLayer.bringToBack();
+}
+// 住所から位置を探す（国土地理院）。見つけた位置は記録に覚えておき、次からは探さない
+async function geocode(rec) {
+  const a = rec.address.trim();
+  if (!a) return null;
+  if (rec.geo && rec.geo.q === a) return rec.geo;
+  // 見つからなければ、空白の後ろ（建物名など）を外してもう一度探す
+  const tries = [a];
+  const head = a.split(/[\s　]+/)[0];
+  if (head && head !== a) tries.push(head);
+  for (const q of tries) {
+    const r = await fetch('https://msearch.gsi.go.jp/address-search/AddressSearch?q=' + encodeURIComponent(q));
+    const j = await r.json();
+    if (Array.isArray(j) && j.length && j[0].geometry) {
+      const [lon, lat] = j[0].geometry.coordinates;
+      rec.geo = { q: a, lat, lon };
+      return rec.geo;
+    }
+  }
+  return null;
+}
+function popupHTML(k) {
+  const r = mvList[k];
+  return `<div class="mv-pop"><b>${k + 1}. ${esc(r.name)}</b><div class="addr">${esc(r.address)}<br>訪問 ${r.dates.length}回${r.dates.length ? '（最後 ' + esc(r.dates[r.dates.length - 1]) + '）' : ''}</div>
+    <div class="mv-pop-btns">
+      <button style="background:#1a6ed8" onclick="mvGo('apple',${k})">🍎 純正</button>
+      <button style="background:#ea4335" onclick="mvGo('google',${k})">Google</button>
+      <button style="background:#7b2fd0" onclick="mvGo('yahoo',${k})">Yahoo!</button>
+      <button style="background:#e8790c" onclick="mvGo('copy',${k})">住所コピー</button>
+    </div></div>`;
+}
+function mvGo(kind, k) {
+  const r = mvList[k];
+  if (!r) return;
+  if (kind === 'yahoo') { openYahooMap(r.address, r.name); return; }
+  click();
+  if (kind === 'apple') window.location.href = appleMapUrl(r.address);
+  else if (kind === 'google') window.location.href = googleMapUrl(r.address);
+  else if (kind === 'copy') {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(r.address).then(() => toast('住所をコピーしました'), () => toast('コピーできませんでした'));
+    else toast('コピーできませんでした');
+  }
+}
+// onlySelected が true なら、チェックした訪問先だけを出す（一覧と同じ、新しい順に番号をつける）
+async function openVisitMap(onlySelected) {
+  const all = getRecords();
+  const list = (onlySelected ? selectedRecords() : all.slice().reverse()).filter(r => r.address.trim());
+  if (!list.length) { sad(); toast('住所が入っている訪問先がありません'); return; }
+  click();
+  const token = ++mvToken;
+  const sub = document.getElementById('mvSub');
+  document.getElementById('mvTitle').textContent = onlySelected ? `選んだ訪問先（${list.length}件）` : '訪問先の地図';
+  sub.textContent = '地図を読み込み中…';
+  document.getElementById('mapView').classList.add('show');
+  try { await loadLeaflet(); }
+  catch (e) { sub.textContent = '地図を読み込めませんでした。電波を確認してください'; return; }
+  if (token !== mvToken) return;
+  if (!mvMap) {
+    mvMap = L.map('mvMap').setView([34.95, 135.76], 12);
+    // 切り替えボタンを押したときに、地図が動いたりピンの吹き出しが閉じたりしないようにする
+    const tabs = document.querySelector('.mv-tabs');
+    L.DomEvent.disableClickPropagation(tabs); L.DomEvent.disableScrollPropagation(tabs);
+    setBase(mvBaseKey);
+  }
+  if (mvLayer) mvLayer.remove();
+  mvLayer = L.layerGroup().addTo(mvMap);
+  mvMap.invalidateSize();
+  mvList = list;
+  sub.textContent = '場所を探しています…';
+  const found = await Promise.all(list.map(r => geocode(r).catch(() => null)));
+  if (token !== mvToken) return;
+  // 見つけた位置を保存しておく（同じ記録を all から探して geo を入れる）
+  const byId = new Map(list.map(r => [r.id, r]));
+  all.forEach(r => { const g = byId.get(r.id); if (g && g.geo) r.geo = g.geo; });
+  writeStore(all);
+  const pts = [], miss = [];
+  found.forEach((g, k) => {
+    if (!g) { miss.push(list[k].name); return; }
+    L.marker([g.lat, g.lon], { icon: L.divIcon({ className: '', html: `<div class="mv-pin">${k + 1}</div>`, iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15] }) })
+      .bindPopup(popupHTML(k)).addTo(mvLayer);
+    pts.push([g.lat, g.lon]);
+  });
+  mvMap.invalidateSize();
+  if (pts.length === 1) mvMap.setView(pts[0], 16);
+  else if (pts.length) mvMap.fitBounds(pts, { padding: [40, 40], maxZoom: 17 });
+  sub.textContent = pts.length + 'か所' + (miss.length ? '（見つからない：' + miss.join('、') + '）' : '　ピンを押すと地図アプリで開けます');
+}
+function closeVisitMap() {
+  click();
+  mvToken++;
+  document.getElementById('mapView').classList.remove('show');
 }
 
 // ── BACKUP ──
