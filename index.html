@@ -362,6 +362,11 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 .mv-tab { border: none; background: transparent; border-radius: 8px; padding: 7px 9px; font-size: 12px; font-weight: 700; color: #444; font-family: inherit; cursor: pointer; white-space: nowrap; }
 .mv-tab.on { background: var(--accent); color: #fff; }
 .mv-pin { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+.mv-loc { position: absolute; right: 10px; bottom: 28px; z-index: 1000; width: 44px; height: 44px; border: none; border-radius: 12px; background: #fff; color: #888; box-shadow: 0 2px 8px rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.mv-loc.on { color: var(--accent); }
+.mv-loc svg { width: 24px; height: 24px; }
+/* 現在地の赤い丸 */
+.mv-me { width: 18px; height: 18px; border-radius: 50%; background: #ff2d2d; border: 3px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.15), 0 1px 4px rgba(0,0,0,.4); }
 .mv-pop { font-family: var(--font); min-width: 180px; }
 .mv-pop b { font-size: 14px; }
 .mv-pop .addr { font-size: 12px; color: #666; margin: 2px 0 8px; }
@@ -705,6 +710,8 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
       <button class="mv-tab" data-k="photo" onclick="setBase('photo')">航空写真</button>
       <button class="mv-tab" data-k="pale" onclick="setBase('pale')">淡色</button>
     </div>
+    <!-- 現在地（右下）。押すと自分の位置を赤い丸で出して、そこへ移動する -->
+    <button class="mv-loc" id="mvLoc" onclick="locateMe()" aria-label="現在地"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3 3 10.5l7.5 2.9L13.4 21z"/></svg></button>
   </div>
 </div>
 
@@ -1374,6 +1381,7 @@ async function openVisitMap(onlySelected) {
   }
   if (mvLayer) mvLayer.remove();
   mvLayer = L.layerGroup().addTo(mvMap);
+  if (mvLocOn) startLoc();
   mvMap.invalidateSize();
   mvList = list;
   sub.textContent = '場所を探しています…';
@@ -1395,9 +1403,47 @@ async function openVisitMap(onlySelected) {
   else if (pts.length) mvMap.fitBounds(pts, { padding: [40, 40], maxZoom: 17 });
   sub.textContent = pts.length + 'か所' + (miss.length ? '（見つからない：' + miss.join('、') + '）' : '　ピンを押すと地図アプリで開けます');
 }
+// 現在地：一度オンにしたら覚えておき、次に地図を開いたときも自動で出す
+let mvWatch = null, mvMe = null, mvAcc = null, mvFollow = false, mvLocOn = false;
+try { mvLocOn = localStorage.getItem('map_loc') === '1'; } catch (_) {}
+function locateMe() {
+  if (!mvMap) return;
+  if (!navigator.geolocation) { toast('この端末では現在地が使えません'); return; }
+  mvLocOn = true;
+  try { localStorage.setItem('map_loc', '1'); } catch (_) {}
+  if (mvMe) mvMap.setView(mvMe.getLatLng(), Math.max(mvMap.getZoom(), 16));
+  else mvFollow = true; // 位置がわかったらそこへ移動する
+  startLoc();
+}
+function startLoc() {
+  if (mvWatch !== null || !mvMap || !navigator.geolocation) return;
+  document.getElementById('mvLoc').classList.add('on');
+  mvWatch = navigator.geolocation.watchPosition(pos => {
+    const ll = [pos.coords.latitude, pos.coords.longitude], r = pos.coords.accuracy;
+    if (!mvMe) {
+      mvAcc = L.circle(ll, { radius: r, color: '#ff2d2d', weight: 1, fillColor: '#ff2d2d', fillOpacity: .12, interactive: false }).addTo(mvMap);
+      mvMe = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="mv-me"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), interactive: false, zIndexOffset: 1000 }).addTo(mvMap);
+    } else { mvMe.setLatLng(ll); mvAcc.setLatLng(ll).setRadius(r); }
+    if (mvFollow) { mvFollow = false; mvMap.setView(ll, Math.max(mvMap.getZoom(), 16)); }
+  }, err => {
+    stopLoc();
+    if (err.code === 1) {
+      mvLocOn = false;
+      try { localStorage.removeItem('map_loc'); } catch (_) {}
+      toast('位置情報が許可されていません（設定で許可してください）');
+    } else toast('現在地がわかりませんでした');
+  }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 });
+}
+function stopLoc() {
+  if (mvWatch !== null) navigator.geolocation.clearWatch(mvWatch);
+  mvWatch = null; mvFollow = false;
+  if (mvMe) { mvMe.remove(); mvAcc.remove(); mvMe = mvAcc = null; }
+  const b = document.getElementById('mvLoc'); if (b) b.classList.remove('on');
+}
 function closeVisitMap() {
   click();
   mvToken++;
+  stopLoc();
   document.getElementById('mapView').classList.remove('show');
 }
 
