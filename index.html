@@ -262,7 +262,17 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 }
 .record-card.selected { border-color: var(--accent); }
 
-.card-top { display: flex; align-items: center; gap: 10px; padding: 14px 14px 10px; }
+.card-top { display: flex; align-items: center; gap: 10px; padding: 14px; }
+.card-toggle {
+  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+  background: none; border: none; padding: 0; margin: 0;
+  color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.card-chevron { color: var(--text-faint); font-size: 12px; transition: transform 0.2s; flex-shrink: 0; }
+.record-card.open .card-chevron { transform: rotate(180deg); }
+/* 一覧では名前だけ。名前をタップすると中身が開く */
+.card-detail { display: none; }
+.record-card.open .card-detail { display: block; }
 .card-checkbox { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 .card-name { font-size: 17px; font-weight: 700; flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .visit-badge {
@@ -1013,6 +1023,8 @@ function getRecords() {
 }
 
 // ── LIST ──
+// 開いている名簿（一覧を描き直しても開いたままにする）
+const openCards = new Set();
 function loadRecords() {
   const filtered = getRecords();
   const el = document.getElementById('recordsList');
@@ -1035,12 +1047,16 @@ function loadRecords() {
     const phone = record.phone ? `<a href="tel:${esc(record.phone.replace(/[^\d+]/g, ''))}">${esc(record.phone)}</a>` : '未登録';
 
     return `
-    <div class="record-card" id="card-${id}">
+    <div class="record-card${openCards.has(record.id) ? ' open' : ''}" id="card-${id}">
       <div class="card-top">
         <input type="checkbox" class="card-checkbox select-record" value="${id}" aria-label="${esc(record.name)}を選択">
-        <div class="card-name">${esc(record.name)}</div>
-        <span class="visit-badge">${record.dates.length}回</span>
+        <button type="button" class="card-toggle" data-action="toggle" data-id="${id}" aria-expanded="${openCards.has(record.id)}">
+          <span class="card-name">${esc(record.name)}</span>
+          <span class="visit-badge">${record.dates.length}回</span>
+          <span class="card-chevron" aria-hidden="true">▼</span>
+        </button>
       </div>
+      <div class="card-detail">
       <div class="card-body">
         <div class="card-row"><span class="card-row-label">電話</span><span class="card-row-val">${phone}</span></div>
         <div class="card-row"><span class="card-row-label">属性</span><span class="card-row-val">${esc(record.age || '?')}歳 / ${esc(record.gender)} / ${esc(record.nationality || '?')} / ${esc(record.occupation || '?')}</span></div>
@@ -1059,6 +1075,7 @@ function loadRecords() {
         <button class="act-btn btn-edit" data-action="edit" data-id="${id}">編集</button>
       </div>
       <button class="btn-delete-card" data-action="delete" data-id="${id}">この名簿を削除</button>
+      </div>
     </div>`;
   }).join('');
   toggleMultiBar();
@@ -1070,6 +1087,14 @@ document.getElementById('recordsList').addEventListener('click', e => {
   if (!btn) return;
   const id = btn.dataset.id;
   switch (btn.dataset.action) {
+    case 'toggle': {
+      click();
+      const card = btn.closest('.record-card');
+      const open = card.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+      if (open) openCards.add(id); else openCards.delete(id);
+      break;
+    }
     case 'del-date': deleteSingleDate(id, Number(btn.dataset.index)); break;
     case 'add-date': openDateModal(id); break;
     case 'edit': editRecord(id); break;
