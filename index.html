@@ -446,6 +446,23 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 #ccMovie .ccm-box { width: 100%; max-width: 420px; display: grid; gap: 10px; }
 #ccMovie video { width: 100%; pointer-events: none; aspect-ratio: 1; background: #000; border: 3px double #f8f8f8; border-radius: 6px; }
 #ccMovie .ccm-close { padding: 11px; border-radius: 10px; border: none; background: #f8f8f8; color: #0b1120; font: 700 14px -apple-system, "Hiragino Sans", sans-serif; cursor: pointer; }
+
+/* === 使い方（めたん→つむぎ→はう→小夜 の順番に声で説明。代引計算と同じ4人） === */
+body.tut { padding-bottom: 200px; }
+.hl { outline: 3px solid #d97757 !important; outline-offset: 3px; border-radius: 10px; box-shadow: 0 0 18px rgba(217,119,87,.6) !important; }
+#tut { position: fixed; left: 0; right: 0; bottom: 0; z-index: 300; display: none; justify-content: center; padding: 0 10px calc(10px + env(safe-area-inset-bottom)); pointer-events: none; }
+body.tut #tut { display: flex; }
+body.tut-up #tut { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /* 下のバーを説明するときは、その上に出す */
+#tut .box { pointer-events: auto; width: 100%; max-width: 480px; background: #1c1c1e; color: #fff; border: 2px solid #d97757; border-radius: 14px; padding: 10px 12px; box-shadow: 0 -4px 20px rgba(0,0,0,.35); font-family: var(--font); }
+#tut .row1 { display: flex; gap: 10px; align-items: center; }
+#tut .who { flex: 0 0 auto; text-align: center; font-size: 11px; font-weight: 700; color: #ffd9a8; }
+#tutFace { display: block; width: 42px; height: 51px; margin: 0 auto 2px; image-rendering: pixelated; }
+#tutCap { flex: 1; font-size: 15px; line-height: 1.55; min-height: 3.1em; }
+#tut .row2 { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+#tut .row2 button { flex: 1; font-family: inherit; font-size: 13px; font-weight: 700; color: #fff; background: #2c2c2e; border: 1px solid #48484a; border-radius: 8px; padding: 7px 2px; cursor: pointer; }
+#tut .row2 #tutEnd { flex: 0 0 auto; padding: 7px 10px; background: #d97757; border-color: #d97757; }
+#tut .row2 #tutNo { flex: 0 0 auto; font-size: 11px; color: #8e8e93; padding: 0 4px; }
+.record-card.tut-demo { pointer-events: none; }
 </style>
 </head>
 <body>
@@ -609,6 +626,9 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
     <div class="topbar-title">実践訪問先</div>
   </div>
   <div class="topbar-actions">
+    <button class="icon-btn" id="tutBtn" type="button">
+      <span class="ico">📖</span><span class="lbl">使い方</span>
+    </button>
     <button class="icon-btn" onclick="openExportModal()">
       <span class="ico">⬇️</span><span class="lbl">データ保存</span>
     </button>
@@ -796,6 +816,22 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
   </div>
 </div>
 
+<!-- 使い方（4人が順番に声で説明する） -->
+<div id="tut" aria-live="polite">
+  <div class="box">
+    <div class="row1">
+      <div class="who"><canvas id="tutFace" width="56" height="68" aria-hidden="true"></canvas><span id="tutName"></span></div>
+      <div id="tutCap"></div>
+    </div>
+    <div class="row2">
+      <button id="tutPrev" type="button">◀ 前</button>
+      <button id="tutPlay" type="button">⏸ 止める</button>
+      <button id="tutNext" type="button">次 ▶</button>
+      <span id="tutNo"></span>
+      <button id="tutEnd" type="button">✕ おわる</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1788,6 +1824,194 @@ e.style.cssText='display:block;width:100%;text-align:center;font:11px/1.4 sans-s
 var t=document.querySelector('#opgo,#op-press,#op-start,#tapHint,#opPressText,#startBtn,.op-press-text');
 if(t){t.insertAdjacentElement('afterend',e);return;}
 var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendChild(e);})();</script>
+<script>
+// =============================================================
+// 使い方（めたん→つむぎ→はう→小夜 の順番に、声で説明する。代引計算と同じ4人）
+//   右上の「📖 使い方」で始まる。説明している所を光らせて、例の名前や住所を自動で入れる
+//   例の記録は画面に出すだけで、保存はしない（おわると元の画面にもどる）
+// =============================================================
+(function tutorial() {
+  const $ = id => document.getElementById(id);
+  // 1文字＝1ドット（横14×縦16）。S＝はだ、E＝目
+  const SPK = [
+    { name: 'めたん', pal: { H: '#e04b8f', D: '#c43a7a', d: '#f07ab0', S: '#ffe2cc', E: '#d9a020', K: '#2b2733', W: '#f4f0f0' }, map: [
+      '....HHHHHH....', '..HHHHHHHHHH..', '.HHHHHHHHHHHH.', '.HHHHHHHHHHHH.',
+      'DHHSSHSSHSSHHD', 'dHSSSSSSSSSSHd', 'DHSEESSSSEESHD', 'dHSEESSSSEESHd',
+      'DDSSSSSSSSSSDD', 'dd.SSSSSSSS.dd', 'DD..SSSSSS..DD', '.dd.KWWWWK.dd.',
+      '.DD.KKWWKK.DD.', '..d.KKKKKK.d..', '...KKKKKKKK...', '...KKKKKKKK...'] },
+    { name: 'つむぎ', pal: { H: '#f2c740', h: '#ffe08a', S: '#ffe2cc', E: '#7a4a2a', W: '#f4f4f4', R: '#e04848' }, map: [
+      '.....HHHH.....', '..HHHHhHHHHH..', '.HHHHHHHHHHHH.', 'HHHHHHHHHHHHHH',
+      'HHHSSHHSSHSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
+      'HHSSSSSSSSSSHH', 'HH.SSSSSSSS.HH', 'HH..SSSSSS..HH', 'HHH.WWRRWW.HHH',
+      'HHH.WWRRWW.HHH', '.HH.WWWWWW.HH.', '...WWWWWWWW...', '...WWWWWWWW...'] },
+    { name: 'はう', pal: { H: '#9ccbe8', C: '#ffffff', X: '#e04848', S: '#ffe2cc', E: '#4a7ab0', W: '#ffffff', P: '#f6b8c8' }, map: [
+      '...CCCCCCCC...', '..CCCCXCCCCC..', '.HHHHHHHHHHHH.', '.HHHHHHHHHHHH.',
+      'HHHSSHSSHSSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
+      '.HSSSSSSSSSSH.', '.H.SSSSSSSS.H.', '....SSSSSS....', '...PWWWWWWP...',
+      '..PPWWWWWWPP..', '..PPWWWWWWPP..', '..PPPWWWWPPP..', '..PPPWWWWPPP..'] },
+    { name: '小夜', pal: { H: '#8a5a3a', I: '#f2a0b0', S: '#ffe2cc', E: '#3a8a5a', G: '#e8d070', K: '#b04040' }, map: [
+      '.HH........HH.', '.HIH......HIH.', '.HHHHHHHHHHHH.', 'HHHHHHHHHHHHHH',
+      'HHHSSHSSHSSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
+      'HHSSSSSSSSSSHH', 'HH.SSSSSSSS.HH', '.H..SSSSSS..H.', '...GGGGGGGG...',
+      '..KKKKKKKKKK..', '..KKKKKKKKKK..', '..KKKKKKKKKK..', '..KKKKKKKKKK..'] },
+  ];
+  const DEMO = 'tut-demo';
+  const demoCard = () => document.querySelector('.record-card.' + DEMO);
+  const q = sel => () => document.querySelector(sel);
+  // [字幕, 光らせる所（関数）, その場面でする操作]。i 番目は SPK[i % 4] が読む
+  // 声は koe-tut/番号.wav（VOICEVOX で作ったもの）。KOE_V が 0 の間は 端末の声で読む
+  //   字幕を変えたら声も作り直すこと（KOE_V を1つ上げる）
+  const KOE_V = 0;
+  const STEPS = [
+    ['こんにちは。実践訪問先アプリの使い方を説明します。', null, () => switchTab('list')],
+    ['訪問先を書きこむときは、上の「＋ 登録」を押します。', q('.tab[data-tab="form"]'), () => switchTab('form')],
+    ['訪問先の名前を入れます。名前と住所は、かならず入れてください。', () => $('name').closest('.field'), () => typeIn('name', '山田 太郎')],
+    ['郵便番号を7けた入れると、住所が自動で出ます。続けて番地を入れてください。', () => $('zip').closest('.field'), () => { typeIn('zip', '612-8000'); setTimeout(() => tutOn && typeIn('address', '京都市伏見区〇〇町1-2'), 1400); }],
+    ['電話番号や年齢、備考も書いておけます。さいごに「登録する」を押すと保存されます。', () => $('submitBtn')],
+    ['登録した訪問先は「記録一覧」に、名前だけ一行で並びます。', () => demoCard(), () => { switchTab('list'); showDemo(); }],
+    ['名前をタップすると、住所・電話・訪問履歴が開きます。電話番号をタップすると、そのまま電話をかけられます。', () => demoCard(), () => { showDemo(); demoCard().classList.add('open'); }],
+    ['また訪問したら「＋訪問日」を押して、日付を足します。訪問した回数も数えてくれます。', () => demoCard() && demoCard().querySelector('.btn-adddate'), () => { showDemo(); demoCard().classList.add('open'); }],
+    ['「純正」「Google」「Yahoo」のボタンで、地図のアプリに住所を出せます。', () => demoCard() && demoCard().querySelector('.card-actions'), () => { showDemo(); demoCard().classList.add('open'); }],
+    ['名前の横にチェックを入れると、下に「地図」と「画像保存」のボタンが出ます。えらんだ訪問先を、地図や画像で見られます。', () => $('multiBar'), () => { showDemo(); demoBar(true); }],
+    ['「データ保存」で記録を書き出して、「復元」でもどせます。機種変更のときにも使えます。', q('.topbar-actions')],
+    ['左上のキャラクターをタップすると、自己紹介をしてくれます。', q('.cc-wrap')],
+    ['説明は以上です。ご利用ありがとうございました。', null],
+  ];
+  // 例の記録（画面に出すだけ。保存はしない）
+  function showDemo() {
+    if (demoCard()) return;
+    const list = $('recordsList');
+    list.querySelector('.empty-state')?.remove();
+    list.insertAdjacentHTML('afterbegin', `
+    <div class="record-card ${DEMO}">
+      <div class="card-top">
+        <input type="checkbox" class="card-checkbox" tabindex="-1" aria-hidden="true">
+        <button type="button" class="card-toggle" tabindex="-1"><span class="card-name">山田 太郎（例）</span><span class="visit-badge">2回</span><span class="card-chevron" aria-hidden="true">▼</span></button>
+      </div>
+      <div class="card-detail">
+      <div class="card-body">
+        <div class="card-row"><span class="card-row-label">電話</span><span class="card-row-val"><a>090-1234-5678</a></span></div>
+        <div class="card-row"><span class="card-row-label">住所</span><span class="card-row-val">〒612-8000 京都市伏見区〇〇町1-2</span></div>
+        <div class="dates-section"><div class="dates-title">訪問履歴</div>
+          <div class="date-pill-list"><span class="date-pill"><span class="date-num">1回</span>${todayStr()}</span><span class="date-pill"><span class="date-num">2回</span>${todayStr()}</span></div></div>
+      </div>
+      <div class="card-actions">
+        <a class="map-btn btn-apple">🍎<br>純正</a><a class="map-btn btn-google">🗺<br>Google</a><span class="map-btn btn-yahoo">Y!<br>Yahoo</span>
+        <span class="act-btn btn-adddate">＋<br>訪問日</span><span class="act-btn btn-edit">編集</span>
+      </div>
+      </div>
+    </div>`);
+  }
+  // 下のバー（地図・画像保存）を例として出す・しまう
+  function demoBar(on) {
+    const c = demoCard();
+    if (c) { c.querySelector('.card-checkbox').checked = on; c.classList.toggle('selected', on); }
+    if (on) { $('multiBar').classList.add('visible'); $('multiBarLabel').textContent = '1件選択中'; }
+    else toggleMultiBar();
+    document.body.classList.toggle('tut-up', on);
+  }
+  // 文字を1文字ずつ打ちこむ
+  function typeIn(id, text) {
+    const el = $(id); el.value = '';
+    [...text].forEach((ch, k) => setTimeout(() => { if (tutOn) el.value += ch; }, 250 + k * 110));
+  }
+
+  const koe = [];   // 声（デコード済み）。読めなかったときは端末の声で読む
+  function loadKoe() {
+    if (koe.length) return;
+    STEPS.forEach((st, i) => koe[i] = !KOE_V || !audioCtx ? Promise.resolve(null) :
+      fetch('koe-tut/' + String(i).padStart(2, '0') + '.wav?v=' + KOE_V)
+        .then(r => r.ok ? r.arrayBuffer() : null).catch(() => null)
+        .then(ab => ab && new Promise(res => { try { audioCtx.decodeAudioData(ab, b => res(b), () => res(null)); } catch (e) { res(null); } })));
+  }
+  // 端末の声は 4人で 高さを少しずつ変えて、だれが話しているか分かるようにする
+  const PITCH = [1.25, 1.1, 1.45, 0.95];
+  let tutOn = false, tutI = 0, tutPlaying = false, tutToken = null, tutSrc = null, talking = false, saved = null;
+  function stopVoice() {
+    tutToken = null; talking = false;
+    if (tutSrc) { try { tutSrc.onended = null; tutSrc.stop(); } catch (e) {} tutSrc = null; }
+    try { speechSynthesis.cancel(); } catch (e) {}
+  }
+  function showStep(i) {
+    tutI = i;
+    const st = STEPS[i], sp = SPK[i % 4];
+    $('tutCap').textContent = st[0];
+    $('tutName').textContent = sp.name;
+    $('tutNo').textContent = (i + 1) + '/' + STEPS.length;
+    document.querySelectorAll('.hl').forEach(e => e.classList.remove('hl'));
+    demoBar(false);
+    if (st[2]) st[2]();
+    const el = st[1] && st[1]();
+    if (el) { el.classList.add('hl'); if (el.id !== 'multiBar') el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function playStep(i) {
+    stopVoice(); showStep(i);
+    if (!tutPlaying) return;
+    const token = tutToken = {};
+    const next = () => { if (tutToken !== token) return; talking = false;
+      setTimeout(() => { if (tutToken !== token) return; if (tutI < STEPS.length - 1) playStep(tutI + 1); else { tutPlaying = false; showPlay(); } }, 700); };
+    talking = true;
+    koe[i].then(b => {
+      if (tutToken !== token) return;
+      if (b) {
+        initAudio();
+        const s = audioCtx.createBufferSource(); s.buffer = b; s.connect(audioCtx.destination);
+        s.onended = next; tutSrc = s; s.start();
+      } else {
+        try {
+          const u = new SpeechSynthesisUtterance(STEPS[i][0].replace(/[「」]/g, ''));
+          u.lang = 'ja-JP'; u.pitch = PITCH[i % 4]; u.onend = next; u.onerror = next; speechSynthesis.speak(u);
+        } catch (e) { setTimeout(next, 3500); }
+      }
+    });
+  }
+  function showPlay() { $('tutPlay').textContent = tutPlaying ? '⏸ 止める' : '▶ 聞く'; }
+  const FORM = ['editId', 'visitDate', 'name', 'age', 'gender', 'nationality', 'occupation', 'phone', 'zip', 'address', 'remarks'];
+  function startTut() {
+    if (tutOn) return;
+    initAudio(); click(); loadKoe();
+    // 書きかけの登録画面と、いまのタブを覚えておく（おわったら もどす）
+    saved = { tab: currentTab, form: FORM.map(f => $(f).value) };
+    tutOn = true; tutPlaying = true; document.body.classList.add('tut'); showPlay();
+    playStep(0);
+  }
+  function endTut() {
+    stopVoice(); tutOn = false; tutPlaying = false;
+    document.body.classList.remove('tut');
+    document.querySelectorAll('.hl').forEach(e => e.classList.remove('hl'));
+    demoBar(false); demoCard()?.remove();
+    if (saved) { FORM.forEach((f, k) => $(f).value = saved.form[k]); switchTab(saved.tab); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  $('tutBtn').onclick = startTut;
+  $('tutEnd').onclick = endTut;
+  $('tutPlay').onclick = () => { initAudio(); tutPlaying = !tutPlaying; showPlay(); if (tutPlaying) playStep(tutI); else stopVoice(); };
+  $('tutPrev').onclick = () => { if (tutI > 0) { tutPlaying ? playStep(tutI - 1) : showStep(tutI - 1); } };
+  $('tutNext').onclick = () => { if (tutI < STEPS.length - 1) { tutPlaying ? playStep(tutI + 1) : showStep(tutI + 1); } };
+  // 読んでいる人の顔（しゃべっている間は口がパクパク・体がはずむ）
+  (function face() {
+    const c = $('tutFace'), g = c.getContext('2d'), k = 4;
+    const P = (x, y, col) => { g.fillStyle = col; g.fillRect(x * k, y * k, k, k); };
+    function draw(now) {
+      requestAnimationFrame(draw);
+      if (!tutOn) return;
+      const t = now / 1000, sp = SPK[tutI % 4];
+      const bob = talking && Math.floor(t * 4) % 2 ? -1 : 0, blink = (t % 3.2) > 3.05;
+      g.clearRect(0, 0, c.width, c.height);
+      sp.map.forEach((row, y) => [...row].forEach((ch, x) => {
+        if (ch === '.') return;
+        if (ch === 'E' && blink) { if (y === 7) P(x, y + bob + 1, '#5a3a3a'); return; }
+        P(x, y + bob + 1, sp.pal[ch]);
+      }));
+      const open = talking && Math.floor(t * 9) % 3 !== 0;
+      if (open) { P(6, 10 + bob, '#8a2a3a'); P(7, 10 + bob, '#8a2a3a'); P(6, 11 + bob, '#e07080'); P(7, 11 + bob, '#8a2a3a'); }
+      else { P(6, 10 + bob, '#c0505a'); P(7, 10 + bob, '#c0505a'); }
+    }
+    requestAnimationFrame(draw);
+  })();
+})();
+</script>
 <!-- オレンジのキャラクター（勤務指定表と同じ絵・同じ動き。パソコンを打つ・夜はねる・1〜250番の動き） -->
 <script src="https://aaiuioo-maker.github.io/kinmu-shitei/cc-chara.js"></script>
 </body>
