@@ -461,6 +461,7 @@ body.tut-up #tut { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /*
 #tut .row2 { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
 #tut .row2 button { flex: 1; font-family: inherit; font-size: 13px; font-weight: 700; color: #fff; background: #2c2c2e; border: 1px solid #48484a; border-radius: 8px; padding: 7px 2px; cursor: pointer; }
 #tut .row2 #tutEnd { flex: 0 0 auto; padding: 7px 10px; background: #d97757; border-color: #d97757; }
+#tut .credit { font-size: 10px; color: #8e8e93; margin-top: 4px; text-align: right; }
 #tut .row2 #tutNo { flex: 0 0 auto; font-size: 11px; color: #8e8e93; padding: 0 4px; }
 .record-card.tut-demo { pointer-events: none; }
 </style>
@@ -830,6 +831,7 @@ body.tut-up #tut { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /*
       <span id="tutNo"></span>
       <button id="tutEnd" type="button">✕ おわる</button>
     </div>
+    <div class="credit">声：VOICEVOX:四国めたん・春日部つむぎ・雨晴はう・小夜/SAYO</div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -1859,9 +1861,9 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
   const demoCard = () => document.querySelector('.record-card.' + DEMO);
   const q = sel => () => document.querySelector(sel);
   // [字幕, 光らせる所（関数）, その場面でする操作]。i 番目は SPK[i % 4] が読む
-  // 声は koe-tut/番号.wav（VOICEVOX で作ったもの）。KOE_V が 0 の間は 端末の声で読む
+  // 声は koe-tut/番号.wav（VOICEVOX で作ったもの）。読めなかったときは 端末の声で読む
   //   字幕を変えたら声も作り直すこと（KOE_V を1つ上げる）
-  const KOE_V = 0;
+  const KOE_V = 1;
   const STEPS = [
     ['こんにちは。実践訪問先アプリの使い方を説明します。', null, () => switchTab('list')],
     ['訪問先を書きこむときは、上の「＋ 登録」を押します。', q('.tab[data-tab="form"]'), () => switchTab('form')],
