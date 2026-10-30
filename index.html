@@ -447,7 +447,7 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 #ccMovie video { width: 100%; pointer-events: none; aspect-ratio: 1; background: #000; border: 3px double #f8f8f8; border-radius: 6px; }
 #ccMovie .ccm-close { padding: 11px; border-radius: 10px; border: none; background: #f8f8f8; color: #0b1120; font: 700 14px -apple-system, "Hiragino Sans", sans-serif; cursor: pointer; }
 
-/* === 使い方（めたん→つむぎ→はう→小夜 の順番に声で説明。代引計算と同じ4人） === */
+/* === 使い方（つくよみちゃん→MANA→KANA→アメノちゃん→リリンちゃん の順番に声で説明。COEIROINK の5人） === */
 body.tut { padding-bottom: 200px; }
 .hl { outline: 3px solid #d97757 !important; outline-offset: 3px; border-radius: 10px; box-shadow: 0 0 18px rgba(217,119,87,.6) !important; }
 #tut { position: fixed; left: 0; right: 0; bottom: 0; z-index: 300; display: none; justify-content: center; padding: 0 10px calc(10px + env(safe-area-inset-bottom)); pointer-events: none; }
@@ -831,7 +831,7 @@ body.tut-up #tut { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /*
       <span id="tutNo"></span>
       <button id="tutEnd" type="button">✕ おわる</button>
     </div>
-    <div class="credit">声：VOICEVOX:四国めたん・春日部つむぎ・雨晴はう・小夜/SAYO</div>
+    <div class="credit">声：COEIROINK:つくよみちゃん・MANA・KANA・アメノちゃん・リリンちゃん</div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -3171,7 +3171,7 @@ if(t){t.insertAdjacentElement('afterend',e);return;}
 var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendChild(e);})();</script>
 <script>
 // =============================================================
-// 使い方（めたん→つむぎ→はう→小夜 の順番に、声で説明する。代引計算と同じ4人）
+// 使い方（つくよみちゃん→MANA→KANA→アメノちゃん→リリンちゃん の順番に、声で説明する。COEIROINK の5人）
 //   右上の「📖 使い方」で始まる。説明している所を光らせて、例の名前や住所を自動で入れる
 //   例の記録は画面に出すだけで、保存はしない（おわると元の画面にもどる）
 // =============================================================
@@ -3179,34 +3179,40 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
   const $ = id => document.getElementById(id);
   // 1文字＝1ドット（横14×縦16）。S＝はだ、E＝目
   const SPK = [
-    { name: 'めたん', pal: { H: '#e04b8f', D: '#c43a7a', d: '#f07ab0', S: '#ffe2cc', E: '#d9a020', K: '#2b2733', W: '#f4f0f0' }, map: [
-      '....HHHHHH....', '..HHHHHHHHHH..', '.HHHHHHHHHHHH.', '.HHHHHHHHHHHH.',
-      'DHHSSHSSHSSHHD', 'dHSSSSSSSSSSHd', 'DHSEESSSSEESHD', 'dHSEESSSSEESHd',
-      'DDSSSSSSSSSSDD', 'dd.SSSSSSSS.dd', 'DD..SSSSSS..DD', '.dd.KWWWWK.dd.',
-      '.DD.KKWWKK.DD.', '..d.KKKKKK.d..', '...KKKKKKKK...', '...KKKKKKKK...'] },
-    { name: 'つむぎ', pal: { H: '#f2c740', h: '#ffe08a', S: '#ffe2cc', E: '#7a4a2a', W: '#f4f4f4', R: '#e04848' }, map: [
-      '.....HHHH.....', '..HHHHhHHHHH..', '.HHHHHHHHHHHH.', 'HHHHHHHHHHHHHH',
-      'HHHSSHHSSHSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
-      'HHSSSSSSSSSSHH', 'HH.SSSSSSSS.HH', 'HH..SSSSSS..HH', 'HHH.WWRRWW.HHH',
-      'HHH.WWRRWW.HHH', '.HH.WWWWWW.HH.', '...WWWWWWWW...', '...WWWWWWWW...'] },
-    { name: 'はう', pal: { H: '#9ccbe8', C: '#ffffff', X: '#e04848', S: '#ffe2cc', E: '#4a7ab0', W: '#ffffff', P: '#f6b8c8' }, map: [
-      '...CCCCCCCC...', '..CCCCXCCCCC..', '.HHHHHHHHHHHH.', '.HHHHHHHHHHHH.',
+    { name: 'つくよみ', pal: { H: '#c8d8f0', h: '#e8f0ff', R: '#e07090', S: '#ffe2cc', E: '#4a4a6a', W: '#f8f8f8', K: '#d04050' }, map: [
+      '....HHHHHH....', '..HHhHHHHHHH..', '.HHHHHHHHHHHH.', '.HHHHHHHHHHHH.',
+      'RHHSSHSSHSSHHR', 'RHSSSSSSSSSSHR', '.HSSSSSSSSSSH.', 'HHSEESSSSEESHH',
+      'HHSSSSSSSSSSHH', 'HH.SSSSSSSS.HH', 'HH..SSSSSS..HH', 'HH.WWWKKWWW.HH',
+      'HH.WWWWWWWW.HH', '.H.WWWWWWWW.H.', '...WWWWWWWW...', '...WWWWWWWW...'] },
+    { name: 'MANA', pal: { H: '#f4a0a8', D: '#e07880', S: '#ffe2cc', E: '#d08a2a', B: '#7a4a2a', W: '#f4f0f0' }, map: [
+      'DD..HHHHHH..DD', 'DDHHHHHHHHHHDD', '.HHHHHHHHHHHH.', '.HHHHHHHHHHHH.',
       'HHHSSHSSHSSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
-      '.HSSSSSSSSSSH.', '.H.SSSSSSSS.H.', '....SSSSSS....', '...PWWWWWWP...',
-      '..PPWWWWWWPP..', '..PPWWWWWWPP..', '..PPPWWWWPPP..', '..PPPWWWWPPP..'] },
-    { name: '小夜', pal: { H: '#8a5a3a', I: '#f2a0b0', S: '#ffe2cc', E: '#3a8a5a', G: '#e8d070', K: '#b04040' }, map: [
-      '.HH........HH.', '.HIH......HIH.', '.HHHHHHHHHHHH.', 'HHHHHHHHHHHHHH',
-      'HHHSSHSSHSSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
-      'HHSSSSSSSSSSHH', 'HH.SSSSSSSS.HH', '.H..SSSSSS..H.', '...GGGGGGGG...',
+      'HHSSSSSSSSSSHH', '.H.SSSSSSSS.H.', '.H..SSSSSS..H.', '...BBWWWWBB...',
+      '..BBBBWWBBBB..', '..BBBBBBBBBB..', '..BBBBBBBBBB..', '..BBBBBBBBBB..'] },
+    { name: 'KANA', pal: { H: '#8ac8f0', h: '#b0e0ff', S: '#ffe2cc', E: '#8a70c0', K: '#2a2a33', W: '#d0d0d8' }, map: [
+      '...HHHHHHH....', '..HHHHHhHHHH..', '.HHHHHHHHHHHH.', '.HHHHHHHHHHHH.',
+      'HHHHSSHSSHSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
+      'HHSSSSSSSSSSHH', 'HH.SSSSSSSS.HH', '.H..SSSSSS..H.', '...KKKWWKKK...',
       '..KKKKKKKKKK..', '..KKKKKKKKKK..', '..KKKKKKKKKK..', '..KKKKKKKKKK..'] },
+    // アメノちゃん（熊本弁で読む）
+    { name: 'アメノ', pal: { H: '#ecd0b0', R: '#d02a2a', k: '#1a1a1a', S: '#ffe8d8', E: '#3a9a5a', W: '#f8f8f8', P: '#f0a0a0', J: '#2a2a2a', K: '#a08a5a', B: '#ff9ab0' }, map: [
+      '...HHHHHHH....', '..HHHHHHHHRk..', '.HHHHHHHHHRRH.', '.HHHHHHHHHHHH.',
+      'HHHSSHSSHSSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
+      'HHSBSSSSSSBSHH', 'HH.SSSSSSSS.HH', 'HH..SSSSSS..H.', 'HJJWWPPWWJJ.H.',
+      '.HJJWWWWWWJJ..', '..JJWWWWWWJJ..', '..JKJWWWWJKJ..', '..JKJWWWWJKJ..'] },
+    { name: 'リリン', pal: { H: '#f0a050', P: '#a070e0', S: '#ffe2cc', E: '#9a60d0', U: '#4a2a6a' }, map: [
+      'PP..HHHHHH..PP', 'PPPHHHHHHHHPPP', '.HHHHHHHHHHHH.', 'HHHHHHHHHHHHHH',
+      'HHHSSHSSHSSHHH', 'HHSSSSSSSSSSHH', 'HHSEESSSSEESHH', 'HHSEESSSSEESHH',
+      'HHSSSSSSSSSSHH', 'HH.SSSSSSSS.HH', 'HH..SSSSSS..HH', 'HH.UUUUUUUU.HH',
+      'HH.UUUUUUUU.HH', '.HHUUUUUUUUHH.', '..HUUUUUUUUH..', '...UUUUUUUU...'] },
   ];
   const DEMO = 'tut-demo';
   const demoCard = () => document.querySelector('.record-card.' + DEMO);
   const q = sel => () => document.querySelector(sel);
-  // [字幕, 光らせる所（関数）, その場面でする操作]。i 番目は SPK[i % 4] が読む
-  // 声は koe-tut/番号.wav（VOICEVOX で作ったもの）。読めなかったときは 端末の声で読む
+  // [字幕, 光らせる所（関数）, その場面でする操作]。i 番目は SPK[i % SPK.length] が読む（5人で順番に）
+  // 声は koe-tut/番号.mp3（COEIROINK で作ったもの。アメノちゃんは熊本弁）。読めなかったときは 端末の声で読む
   //   字幕を変えたら声も作り直すこと（KOE_V を1つ上げる）
-  const KOE_V = 1;
+  const KOE_V = 2;
   const STEPS = [
     ['こんにちは。実践訪問先アプリの使い方を説明します。', null, () => switchTab('list')],
     ['訪問先を書きこむときは、上の「＋ 登録」を押します。', q('.tab[data-tab="form"]'), () => switchTab('form')],
@@ -3265,12 +3271,12 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
   function loadKoe() {
     if (koe.length) return;
     STEPS.forEach((st, i) => koe[i] = !KOE_V || !audioCtx ? Promise.resolve(null) :
-      fetch('koe-tut/' + String(i).padStart(2, '0') + '.wav?v=' + KOE_V)
+      fetch('koe-tut/' + String(i).padStart(2, '0') + '.mp3?v=' + KOE_V)
         .then(r => r.ok ? r.arrayBuffer() : null).catch(() => null)
         .then(ab => ab && new Promise(res => { try { audioCtx.decodeAudioData(ab, b => res(b), () => res(null)); } catch (e) { res(null); } })));
   }
-  // 端末の声は 4人で 高さを少しずつ変えて、だれが話しているか分かるようにする
-  const PITCH = [1.25, 1.1, 1.45, 0.95];
+  // 端末の声は 5人で 高さを少しずつ変えて、だれが話しているか分かるようにする
+  const PITCH = [1.2, 1.35, 1.05, 1.15, 1.45];
   let tutOn = false, tutI = 0, tutPlaying = false, tutToken = null, tutSrc = null, talking = false, saved = null;
   function stopVoice() {
     tutToken = null; talking = false;
@@ -3279,7 +3285,7 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
   }
   function showStep(i) {
     tutI = i;
-    const st = STEPS[i], sp = SPK[i % 4];
+    const st = STEPS[i], sp = SPK[i % SPK.length];
     $('tutCap').textContent = st[0];
     $('tutName').textContent = sp.name;
     $('tutNo').textContent = (i + 1) + '/' + STEPS.length;
@@ -3306,7 +3312,7 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
       } else {
         try {
           const u = new SpeechSynthesisUtterance(STEPS[i][0].replace(/[「」]/g, ''));
-          u.lang = 'ja-JP'; u.pitch = PITCH[i % 4]; u.onend = next; u.onerror = next; speechSynthesis.speak(u);
+          u.lang = 'ja-JP'; u.pitch = PITCH[i % PITCH.length]; u.onend = next; u.onerror = next; speechSynthesis.speak(u);
         } catch (e) { setTimeout(next, 3500); }
       }
     });
@@ -3341,7 +3347,7 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
     function draw(now) {
       requestAnimationFrame(draw);
       if (!tutOn) return;
-      const t = now / 1000, sp = SPK[tutI % 4];
+      const t = now / 1000, sp = SPK[tutI % SPK.length];
       const bob = talking && Math.floor(t * 4) % 2 ? -1 : 0, blink = (t % 3.2) > 3.05;
       g.clearRect(0, 0, c.width, c.height);
       sp.map.forEach((row, y) => [...row].forEach((ch, x) => {
