@@ -858,7 +858,20 @@ function playTone(freq, type, dur, t = 0) {
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t + dur);
   osc.stop(audioCtx.currentTime + t + dur);
 }
-const click = () => playTone(880, 'square', 0.08);
+// ボタンを押したときのピコピコ音（近畿発の運賃表と同じ高さ）。続けて呼ばれても1回だけ鳴らす
+let lastClick = 0;
+const click = () => {
+  const now = Date.now();
+  if (now - lastClick < 120) return;
+  lastClick = now;
+  playTone(1320, 'square', 0.05); playTone(1760, 'square', 0.07, 0.06);
+};
+// 全部のボタン・リンク・チェックで鳴らす（オープニングと自己紹介は自分の音があるので除く）
+document.addEventListener('click', e => {
+  const el = e.target.closest('button, a, input[type=checkbox], [onclick], [data-action], .tab, .icon-btn');
+  if (!el || el.closest('#op, #ccIntro')) return;
+  click();
+}, true);
 const chime = () => { playTone(523, 'square', 0.1, 0); playTone(659, 'square', 0.1, 0.12); playTone(880, 'square', 0.25, 0.24); };
 const sad = () => { playTone(200, 'sawtooth', 0.15, 0); playTone(150, 'sawtooth', 0.3, 0.15); };
 const save = () => { playTone(440, 'square', 0.1, 0); playTone(554, 'square', 0.1, 0.1); playTone(880, 'square', 0.2, 0.2); };
