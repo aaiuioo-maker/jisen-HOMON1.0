@@ -24,13 +24,13 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>実践訪問先</title>
+<title>訪問先アプリ</title>
 <!-- ── ホーム画面アイコン ── -->
-<link rel="apple-touch-icon" href="icon.png?v=3">
-<link rel="icon" type="image/png" href="icon.png?v=3">
+<link rel="apple-touch-icon" href="icon.png?v=4">
+<link rel="icon" type="image/png" href="icon.png?v=4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="訪問先">
+<meta name="apple-mobile-web-app-title" content="訪問先アプリ">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f2f2f7">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -110,7 +110,7 @@ body {
 .topbar-title { font-size: 18px; font-weight: 700; white-space: nowrap; line-height: 1.1; margin-left: 24px; }
 .topbar-left { flex: 1; }
 .topbar-left { display: flex; align-items: center; min-width: 0; }
-/* 画像保存・データ保存・復元は、タイトル「実践訪問先」のすぐ右に並べる */
+/* 画像保存・データ保存・復元は、タイトル「訪問先アプリ」のすぐ右に並べる */
 .topbar-actions { margin-left: auto; flex-shrink: 0; }
 
 /* === Claude Code のキャラクター（ヘッダー左上） === */
@@ -551,7 +551,7 @@ body.tut-up #tut { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /*
 <div class="op" id="op" role="dialog" aria-label="オープニング">
   <div class="op-in">
     <p class="op-sub">訪問の記録を ひとまとめに</p>
-    <h2 class="op-t"><span>実践</span><b>訪問先</b></h2>
+    <h2 class="op-t"><b>訪問先</b><span>アプリ</span></h2>
     <div class="op-chars">
       <div class="op-c cc"><svg class="op-anim op-cc" viewBox="0 -7 34 23" data-skip="60" aria-hidden="true"></svg><span>Claude Code</span></div>
       <div class="op-c op-gh">
@@ -624,7 +624,7 @@ body.tut-up #tut { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /*
         <span class="gh-label">GitHub</span>
       </a>
     </div>
-    <div class="topbar-title">実践訪問先</div>
+    <div class="topbar-title">訪問先アプリ</div>
   </div>
   <div class="topbar-actions">
     <button class="icon-btn" id="tutBtn" type="button">
@@ -1600,7 +1600,7 @@ function buildPrintHTML(records) {
 
   return `<div id="printRoot" style="background:#e8e8ed;padding:10px;display:inline-block;font-family:'Noto Sans JP',sans-serif;">
     <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:16px;min-width:100%;">
-      <span style="font-size:13px;font-weight:bold;color:#1c1c1e;">実践訪問先　記録一覧</span>
+      <span style="font-size:13px;font-weight:bold;color:#1c1c1e;">訪問先アプリ　記録一覧</span>
       <span style="font-size:10px;color:#666;">${today}　全${records.length}件</span>
     </div>
     <table style="border-collapse:collapse;table-layout:fixed;">
@@ -1678,7 +1678,7 @@ document.querySelectorAll('.modal-overlay').forEach(ov => {
   });
 })();
 
-// タイトル「実践訪問先」を、右のボタンの手前までぎりぎり大きくする（画面の幅が変わったら合わせ直す）
+// タイトル「訪問先アプリ」を、右のボタンの手前までぎりぎり大きくする（画面の幅が変わったら合わせ直す）
 function fitTitle() {
   const t = document.querySelector('.topbar-title');
   if (!t) return;
@@ -3048,7 +3048,7 @@ window.CC_EXTRA = [...BLOCKS, ...MOBS, ...MC2, ...MC3, ...MC4, ...MC5];
 //   公式ページは自己紹介の画面の「公式ページを見る」から開く
 // =============================================================
 (function ccIntro() {
-  const APP = '実践訪問先';
+  const APP = '訪問先アプリ';
   const INTRO = {
     cc: {
       name: 'Claude Code（クロード・コード）',
@@ -3234,9 +3234,9 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
   // [字幕, 光らせる所（関数）, その場面でする操作]。i 番目は SPK[i % SPK.length] が読む（7人で順番に）
   // 声は koe-tut/番号.mp3（AivisSpeech で作ったもの）。読めなかったときは 端末の声で読む
   //   字幕を変えたら声も作り直すこと（KOE_V を1つ上げる）
-  const KOE_V = 3;
+  const KOE_V = 4;
   const STEPS = [
-    ['こんにちは。実践訪問先アプリの使い方を説明します。', null, () => switchTab('list')],
+    ['こんにちは。訪問先アプリの使い方を説明します。', null, () => switchTab('list')],
     ['訪問先を書きこむときは、上の「＋ 登録」を押します。', q('.tab[data-tab="form"]'), () => switchTab('form')],
     ['訪問先の名前を入れます。名前と住所は、かならず入れてください。', () => $('name').closest('.field'), () => typeIn('name', '山田 太郎')],
     ['郵便番号を7けた入れると、住所が自動で出ます。続けて番地を入れてください。', () => $('zip').closest('.field'), () => { typeIn('zip', '612-8000'); setTimeout(() => tutOn && typeIn('address', '京都市伏見区〇〇町1-2'), 1400); }],
