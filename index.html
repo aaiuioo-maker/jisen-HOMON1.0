@@ -275,6 +275,18 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 .record-card.open .card-detail { display: block; }
 .card-checkbox { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 .card-name { font-size: 17px; font-weight: 700; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+/* 名前と、その下の「最後 11/15・伏見区」 */
+.card-main { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.card-main .card-name { flex: none; }
+.card-sub { font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+/* 一覧の上の「最後のデータ保存」 */
+.backup-note {
+  display: block; width: 100%; margin: 0 0 8px; padding: 7px 12px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-faint);
+  font-size: 12px; font-weight: 600; font-family: var(--font); text-align: left; cursor: pointer;
+}
+.backup-note[hidden] { display: none; }
+.backup-note.warn { background: var(--yellow); border-color: var(--yellow); color: #222; }
 .visit-badge {
   font-family: var(--mono); font-size: 11px; font-weight: 500;
   background: var(--surface2);
@@ -647,6 +659,7 @@ body.tut-up #tut { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /*
 
 <!-- LIST PANE -->
 <div class="pane active" id="listPane">
+  <button type="button" class="backup-note" id="backupNote" onclick="openExportModal()" hidden></button>
   <div class="check-all-row">
     <button type="button" class="map-all-btn" id="mapAllBtn" onclick="openVisitMap(false)" hidden>🗺️ 地図で見る</button>
     <button type="button" class="check-all-btn" id="checkAllBtn" onclick="toggleCheckAll()" hidden>☑ すべてにチェック</button>
@@ -900,7 +913,13 @@ function opKey(d){
 (function opening(){
   const op=document.getElementById('op');
   if(!op)return;
-  const h=new Date().getHours();
+  // オープニングは1日1回だけ。その日2回目からは出さずに、すぐいつもの画面にする
+  const nd=new Date(),today=nd.getFullYear()+'-'+(nd.getMonth()+1)+'-'+nd.getDate();
+  try{
+    if(localStorage.getItem('op_day')===today){op.remove();return;}
+    localStorage.setItem('op_day',today);
+  }catch(_){}
+  const h=nd.getHours();
   document.getElementById('ophello').textContent=h<5?'夜おそくまで、おつかれさまです':h<11?'おはようございます':h<17?'こんにちは':'おつかれさまです';
   const TIPS=[
     '登録のとき、郵便番号を7けた入れると住所が出ます',
@@ -1074,11 +1093,52 @@ function getRecords() {
 }
 
 // ── LIST ──
+// 住所から、短い町の名前を取り出す（例：京都府京都市伏見区深草… → 伏見区、滋賀県大津市… → 大津市）
+function shortTown(address) {
+  let a = String(address || '').replace(/^\s+/, '').replace(/^(東京都|北海道|京都府|大阪府|.{2,3}?県)/, '');
+  let m = a.match(/^(.+?市)(.+?区)?/);
+  if (m) return m[2] || m[1];
+  m = a.match(/^(?:.+?郡)?(.+?[町村])/) || a.match(/^(.+?区)/);
+  return m ? m[1] : '';
+}
+// 閉じたカードの名前の下に出す「最後 11/15・伏見区」（去年より前は年もつける）
+function cardSub(record) {
+  const last = record.dates.slice().sort().pop();
+  let s = '';
+  if (last) {
+    const [y, mo, d] = last.split('-').map(Number);
+    s = '最後 ' + (y !== new Date().getFullYear() ? y + '/' : '') + mo + '/' + d;
+  }
+  const town = shortTown(record.address);
+  return [s, town].filter(Boolean).join('・');
+}
+// データ保存（バックアップ）を最後にした日から何日たったかを、一覧の上に出す。2週間あいたらオレンジで知らせる
+const BACKUP_DAYS = 14;
+function markBackup() {
+  try { localStorage.setItem('last_backup', String(Date.now())); } catch (e) {}
+  showBackupNote();
+}
+function showBackupNote() {
+  const el = document.getElementById('backupNote');
+  if (!el) return;
+  if (getRecords().length === 0) { el.hidden = true; return; }
+  let t = 0;
+  try { t = Number(localStorage.getItem('last_backup')) || 0; } catch (e) {}
+  const days = t ? Math.floor((Date.now() - t) / 86400000) : -1;
+  const warn = days < 0 || days >= BACKUP_DAYS;
+  el.textContent = days < 0 ? '⚠️ まだデータ保存をしていません。タップして保存'
+    : warn ? `⚠️ 最後のデータ保存から${days}日たちました。タップして保存`
+    : `💾 最後のデータ保存：${days === 0 ? '今日' : days + '日前'}`;
+  el.classList.toggle('warn', warn);
+  el.hidden = false;
+}
+
 // 開いている名簿（一覧を描き直しても開いたままにする）
 const openCards = new Set();
 function loadRecords() {
   const filtered = getRecords();
   const el = document.getElementById('recordsList');
+  showBackupNote();
 
   if (filtered.length === 0) {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">まだ記録がありません。「＋ 登録」から追加できます。</div></div>`;
@@ -1102,7 +1162,10 @@ function loadRecords() {
       <div class="card-top">
         <input type="checkbox" class="card-checkbox select-record" value="${id}" aria-label="${esc(record.name)}を選択">
         <button type="button" class="card-toggle" data-action="toggle" data-id="${id}" aria-expanded="${openCards.has(record.id)}">
-          <span class="card-name">${esc(record.name)}</span>
+          <span class="card-main">
+            <span class="card-name">${esc(record.name)}</span>
+            ${cardSub(record) ? `<span class="card-sub">${esc(cardSub(record))}</span>` : ''}
+          </span>
           <span class="visit-badge">${record.dates.length}回</span>
           <span class="card-chevron" aria-hidden="true">▼</span>
         </button>
@@ -1537,13 +1600,14 @@ function downloadExport() {
   a.href = URL.createObjectURL(new Blob([document.getElementById('exportBox').value], { type: 'application/json' }));
   a.download = `visit_records_${todayStr()}.json`;
   document.body.appendChild(a); a.click(); a.remove();
+  markBackup();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 function copyExport() {
   const box = document.getElementById('exportBox');
   const fallback = () => { box.focus(); box.select(); toast('選択しました。長押しでコピーしてください'); };
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(box.value).then(() => { chime(); toast('コピーしました'); }, fallback);
+    navigator.clipboard.writeText(box.value).then(() => { chime(); markBackup(); toast('コピーしました'); }, fallback);
   } else fallback();
 }
 function openImportModal() {
