@@ -279,14 +279,6 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 .card-main { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .card-main .card-name { flex: none; }
 .card-sub { font-size: 12px; line-height: 1.4; color: #111; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-/* 一覧の上の「最後のデータ保存」 */
-.backup-note {
-  display: block; width: 100%; margin: 0 0 8px; padding: 7px 12px; border-radius: 10px;
-  border: 1px solid var(--border); background: var(--surface); color: var(--text-faint);
-  font-size: 12px; font-weight: 600; font-family: var(--font); text-align: left; cursor: pointer;
-}
-.backup-note[hidden] { display: none; }
-.backup-note.warn { background: var(--yellow); border-color: var(--yellow); color: #222; }
 .visit-badge {
   font-family: var(--mono); font-size: 11px; font-weight: 500;
   background: var(--surface2);
@@ -659,7 +651,6 @@ body.tut-up #tut { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }   /*
 
 <!-- LIST PANE -->
 <div class="pane active" id="listPane">
-  <button type="button" class="backup-note" id="backupNote" onclick="openExportModal()" hidden></button>
   <div class="check-all-row">
     <button type="button" class="map-all-btn" id="mapAllBtn" onclick="openVisitMap(false)" hidden>🗺️ 地図で見る</button>
     <button type="button" class="check-all-btn" id="checkAllBtn" onclick="toggleCheckAll()" hidden>☑ すべてにチェック</button>
@@ -1093,33 +1084,12 @@ function getRecords() {
 }
 
 // ── LIST ──
-// データ保存（バックアップ）を最後にした日から何日たったかを、一覧の上に出す。2週間あいたらオレンジで知らせる
-const BACKUP_DAYS = 14;
-function markBackup() {
-  try { localStorage.setItem('last_backup', String(Date.now())); } catch (e) {}
-  showBackupNote();
-}
-function showBackupNote() {
-  const el = document.getElementById('backupNote');
-  if (!el) return;
-  if (getRecords().length === 0) { el.hidden = true; return; }
-  let t = 0;
-  try { t = Number(localStorage.getItem('last_backup')) || 0; } catch (e) {}
-  const days = t ? Math.floor((Date.now() - t) / 86400000) : -1;
-  const warn = days < 0 || days >= BACKUP_DAYS;
-  el.textContent = days < 0 ? '⚠️ まだデータ保存をしていません。タップして保存'
-    : warn ? `⚠️ 最後のデータ保存から${days}日たちました。タップして保存`
-    : `💾 最後のデータ保存：${days === 0 ? '今日' : days + '日前'}`;
-  el.classList.toggle('warn', warn);
-  el.hidden = false;
-}
 
 // 開いている名簿（一覧を描き直しても開いたままにする）
 const openCards = new Set();
 function loadRecords() {
   const filtered = getRecords();
   const el = document.getElementById('recordsList');
-  showBackupNote();
 
   if (filtered.length === 0) {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">まだ記録がありません。「＋ 登録」から追加できます。</div></div>`;
@@ -1581,14 +1551,13 @@ function downloadExport() {
   a.href = URL.createObjectURL(new Blob([document.getElementById('exportBox').value], { type: 'application/json' }));
   a.download = `visit_records_${todayStr()}.json`;
   document.body.appendChild(a); a.click(); a.remove();
-  markBackup();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 function copyExport() {
   const box = document.getElementById('exportBox');
   const fallback = () => { box.focus(); box.select(); toast('選択しました。長押しでコピーしてください'); };
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(box.value).then(() => { chime(); markBackup(); toast('コピーしました'); }, fallback);
+    navigator.clipboard.writeText(box.value).then(() => { chime(); toast('コピーしました'); }, fallback);
   } else fallback();
 }
 function openImportModal() {
@@ -1938,7 +1907,7 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
   // [字幕, 光らせる所（関数）, その場面でする操作]。i 番目は SPK[i % SPK.length] が読む（7人で順番に）
   // 声は koe-tut/番号.mp3（AivisSpeech で作ったもの）。読めなかったときは 端末の声で読む
   //   字幕を変えたら声も作り直すこと（KOE_V を1つ上げる）
-  const KOE_V = 6;
+  const KOE_V = 7;
   const STEPS = [
     ['こんにちは。訪問先アプリの使い方を説明します。', null, () => switchTab('list')],
     ['訪問先を書きこむときは、上の「＋ 登録」を押します。', q('.tab[data-tab="form"]'), () => switchTab('form')],
@@ -1951,11 +1920,6 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
     ['「純正」「Google」「Yahoo」のボタンで、地図のアプリに住所を出せます。', () => demoCard() && demoCard().querySelector('.card-actions'), () => { showDemo(); demoCard().classList.add('open'); }],
     ['名前の横にチェックを入れると、下に「地図」と「画像保存」のボタンが出ます。えらんだ訪問先を、地図や画像で見られます。', () => $('multiBar'), () => { showDemo(); demoBar(true); }],
     ['「データ保存」で記録を書き出して、「復元」でもどせます。機種変更のときにも使えます。', q('.topbar-actions')],
-    ['一覧のいちばん上には、最後にデータ保存をした日が出ます。2週間あくとオレンジになるので、タップして保存してください。', () => $('backupNote'), () => {
-      switchTab('list'); showDemo(); showBackupNote();
-      const n = $('backupNote');   // 記録がまだないときも、例として出す
-      if (n.hidden) { n.hidden = false; n.textContent = '⚠️ まだデータ保存をしていません。タップして保存'; n.classList.add('warn'); }
-    }],
     ['左上のキャラクターをタップすると、自己紹介をしてくれます。', q('.cc-wrap')],
     ['説明は以上です。ご利用ありがとうございました。', null],
   ];
@@ -2062,7 +2026,7 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
     stopVoice(); tutOn = false; tutPlaying = false;
     document.body.classList.remove('tut');
     document.querySelectorAll('.hl').forEach(e => e.classList.remove('hl'));
-    demoBar(false); demoCard()?.remove(); showBackupNote();
+    demoBar(false); demoCard()?.remove();
     if (saved) { FORM.forEach((f, k) => $(f).value = saved.form[k]); switchTab(saved.tab); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
