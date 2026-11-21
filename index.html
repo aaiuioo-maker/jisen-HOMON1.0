@@ -275,10 +275,10 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .icon-btn:focus-visib
 .record-card.open .card-detail { display: block; }
 .card-checkbox { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 .card-name { font-size: 17px; font-weight: 700; flex: 1; min-width: 0; overflow-wrap: anywhere; }
-/* 名前と、その下の「最後 11/15・伏見区」 */
+/* 名前と、その下の住所（長いときは折り返して全部出す） */
 .card-main { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .card-main .card-name { flex: none; }
-.card-sub { font-size: 12px; color: #111; font-weight: 600; font-variant-numeric: tabular-nums; }
+.card-sub { font-size: 12px; line-height: 1.4; color: #111; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 /* 一覧の上の「最後のデータ保存」 */
 .backup-note {
   display: block; width: 100%; margin: 0 0 8px; padding: 7px 12px; border-radius: 10px;
@@ -1093,25 +1093,6 @@ function getRecords() {
 }
 
 // ── LIST ──
-// 住所から、短い町の名前を取り出す（例：京都府京都市伏見区深草… → 伏見区、滋賀県大津市… → 大津市）
-function shortTown(address) {
-  let a = String(address || '').replace(/^\s+/, '').replace(/^(東京都|北海道|京都府|大阪府|.{2,3}?県)/, '');
-  let m = a.match(/^(.+?市)(.+?区)?/);
-  if (m) return m[2] || m[1];
-  m = a.match(/^(?:.+?郡)?(.+?[町村])/) || a.match(/^(.+?区)/);
-  return m ? m[1] : '';
-}
-// 閉じたカードの名前の下に出す「最後 11/15・伏見区」（去年より前は年もつける）
-function cardSub(record) {
-  const last = record.dates.slice().sort().pop();
-  let s = '';
-  if (last) {
-    const [y, mo, d] = last.split('-').map(Number);
-    s = '最後 ' + (y !== new Date().getFullYear() ? y + '/' : '') + mo + '/' + d;
-  }
-  const town = shortTown(record.address);
-  return [s, town].filter(Boolean).join('・');
-}
 // データ保存（バックアップ）を最後にした日から何日たったかを、一覧の上に出す。2週間あいたらオレンジで知らせる
 const BACKUP_DAYS = 14;
 function markBackup() {
@@ -1164,7 +1145,7 @@ function loadRecords() {
         <button type="button" class="card-toggle" data-action="toggle" data-id="${id}" aria-expanded="${openCards.has(record.id)}">
           <span class="card-main">
             <span class="card-name">${esc(record.name)}</span>
-            ${cardSub(record) ? `<span class="card-sub">${esc(cardSub(record))}</span>` : ''}
+            ${record.address ? `<span class="card-sub">${esc(record.address)}</span>` : ''}
           </span>
           <span class="visit-badge">${record.dates.length}回</span>
           <span class="card-chevron" aria-hidden="true">▼</span>
@@ -1957,14 +1938,14 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
   // [字幕, 光らせる所（関数）, その場面でする操作]。i 番目は SPK[i % SPK.length] が読む（7人で順番に）
   // 声は koe-tut/番号.mp3（AivisSpeech で作ったもの）。読めなかったときは 端末の声で読む
   //   字幕を変えたら声も作り直すこと（KOE_V を1つ上げる）
-  const KOE_V = 5;
+  const KOE_V = 6;
   const STEPS = [
     ['こんにちは。訪問先アプリの使い方を説明します。', null, () => switchTab('list')],
     ['訪問先を書きこむときは、上の「＋ 登録」を押します。', q('.tab[data-tab="form"]'), () => switchTab('form')],
     ['訪問先の名前を入れます。名前と住所は、かならず入れてください。', () => $('name').closest('.field'), () => typeIn('name', '山田 太郎')],
     ['郵便番号を7けた入れると、住所が自動で出ます。続けて番地を入れてください。', () => $('zip').closest('.field'), () => { typeIn('zip', '612-8000'); setTimeout(() => tutOn && typeIn('address', '京都市伏見区〇〇町1-2'), 1400); }],
     ['電話番号や年齢、備考も書いておけます。さいごに「登録する」を押すと保存されます。', () => $('submitBtn')],
-    ['登録した訪問先は「記録一覧」に並びます。名前の下に、最後に行った日と町の名前が出ます。',() => demoCard(), () => { switchTab('list'); showDemo(); }],
+    ['登録した訪問先は「記録一覧」に並びます。名前の下に、住所が出ます。',() => demoCard(), () => { switchTab('list'); showDemo(); }],
     ['名前をタップすると、住所・電話・訪問履歴が開きます。電話番号をタップすると、そのまま電話をかけられます。', () => demoCard(), () => { showDemo(); demoCard().classList.add('open'); }],
     ['また訪問したら「＋訪問日」を押して、日付を足します。訪問した回数も数えてくれます。', () => demoCard() && demoCard().querySelector('.btn-adddate'), () => { showDemo(); demoCard().classList.add('open'); }],
     ['「純正」「Google」「Yahoo」のボタンで、地図のアプリに住所を出せます。', () => demoCard() && demoCard().querySelector('.card-actions'), () => { showDemo(); demoCard().classList.add('open'); }],
@@ -1987,7 +1968,7 @@ var o=document.querySelector('#opening,#openingScreen,#startBox');if(o)o.appendC
     <div class="record-card ${DEMO}">
       <div class="card-top">
         <input type="checkbox" class="card-checkbox" tabindex="-1" aria-hidden="true">
-        <button type="button" class="card-toggle" tabindex="-1"><span class="card-main"><span class="card-name">山田 太郎（例）</span><span class="card-sub">最後 ${cardSub({ dates: [todayStr()], address: '' }).slice(3)}・伏見区</span></span><span class="visit-badge">2回</span><span class="card-chevron" aria-hidden="true">▼</span></button>
+        <button type="button" class="card-toggle" tabindex="-1"><span class="card-main"><span class="card-name">山田 太郎（例）</span><span class="card-sub">京都市伏見区〇〇町1-2</span></span><span class="visit-badge">2回</span><span class="card-chevron" aria-hidden="true">▼</span></button>
       </div>
       <div class="card-detail">
       <div class="card-body">
